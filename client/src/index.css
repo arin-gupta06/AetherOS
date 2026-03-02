@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+@theme {
+  --color-aether-bg: #0a0a0f;
+  --color-aether-surface: #12121a;
+  --color-aether-border: #1e1e2e;
+  --color-aether-accent: #6366f1;
+  --color-aether-accent-light: #818cf8;
+  --color-aether-success: #10b981;
+  --color-aether-warning: #f59e0b;
+  --color-aether-danger: #ef4444;
+  --color-aether-text: #e2e8f0;
+  --color-aether-muted: #64748b;
+
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
+  --animate-slide-in: slide-in 0.3s ease-out;
+  --animate-fade-in: fade-in 0.3s ease-out;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #1e1e2e #0a0a0f;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e1e2e;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2e2e3e;
+}
+
+/* React Flow overrides */
+.react-flow__node {
+  border-radius: 8px !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.react-flow__edge-path {
+  stroke-width: 2 !important;
+}
+
+.react-flow__background {
+  background-color: #0a0a0f !important;
+}
+
+.react-flow__minimap {
+  background-color: #12121a !important;
+  border: 1px solid #1e1e2e !important;
+  border-radius: 8px !important;
+}
+
+.react-flow__controls {
+  border: 1px solid #1e1e2e !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+
+.react-flow__controls-button {
+  background-color: #12121a !important;
+  border-bottom: 1px solid #1e1e2e !important;
+  fill: #e2e8f0 !important;
+}
+
+.react-flow__controls-button:hover {
+  background-color: #1e1e2e !important;
+}
+
+/* Animations */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.6); }
+}
+
+@keyframes slide-in {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
