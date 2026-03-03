@@ -103,24 +103,24 @@ export default function Header() {
   };
 
   return (
-    <header className="h-12 bg-aether-surface border-b border-aether-border flex items-center justify-between px-4 shrink-0">
+    <header className="h-14 glass-panel border-b-0 border-aether-border flex items-center justify-between px-6 shrink-0 z-50 rounded-none rounded-b-xl mx-2 mt-2">
       {/* Left — Logo & Environment */}
       <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 icon-container p-1.5">
           <Hexagon size={22} className="text-aether-accent" />
-          <span className="font-semibold text-sm tracking-wide">AetherOS</span>
         </div>
+        <span className="font-semibold text-sm tracking-wide">AetherOS</span>
 
-        <div className="h-5 w-px bg-aether-border" />
+        <div className="h-5 w-px bg-aether-border ml-2" />
 
         {/* Environment selector */}
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative ml-2" ref={dropdownRef}>
           <button
             onClick={() => setEnvDropdown(!envDropdown)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded bg-aether-bg border border-aether-border hover:border-aether-accent/40 transition text-xs"
+            className="flex items-center gap-2 px-4 py-1.5 rounded-full glass-btn-secondary text-xs"
           >
             <FolderGit2 size={14} className="text-aether-muted" />
-            <span className="max-w-[200px] truncate">
+            <span className="max-w-50 truncate">
               {currentEnvironment?.name || 'No Environment'}
             </span>
             <ChevronDown size={12} className="text-aether-muted" />

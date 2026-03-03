@@ -31,9 +31,10 @@ export default function RightPanel() {
   };
 
   return (
-    <div className="w-80 bg-aether-surface border-l border-aether-border h-full overflow-y-auto animate-slide-in shrink-0">
-      {/* Header */}
-      <div className="p-3 border-b border-aether-border flex items-center justify-between">
+    <div className="relative pointer-events-none w-80 shrink-0 h-full flex flex-col justify-start">
+      <div className="w-80 glass-panel border border-aether-border h-auto max-h-[calc(100%-1rem)] my-2 mr-2 overflow-y-auto animate-slide-in shrink-0 shadow-2xl z-50 pointer-events-auto flex flex-col absolute right-0">
+        {/* Header */}
+        <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/5 rounded-t-xl">
         <div>
           <h3 className="text-xs font-semibold text-aether-text">{data.label || 'Unknown'}</h3>
           <span className="text-[10px] text-aether-muted font-mono">{selectedNodeId.slice(0, 8)}…</span>
@@ -212,15 +213,16 @@ export default function RightPanel() {
         )}
 
         {/* Delete button */}
-        <div className="pt-3 border-t border-aether-border">
+        <div className="pt-4 border-t border-white/5">
           <button
             onClick={() => { removeNode(selectedNodeId); setSelectedNode(null); }}
-            className="w-full py-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium hover:bg-red-500/20 transition flex items-center justify-center gap-2"
+            className="w-full py-2 rounded-full bg-red-500/10 border border-red-500/30 text-red-500 text-xs font-medium hover:bg-red-500/20 transition flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(239,68,68,0.2)] hover:shadow-[0_6px_20px_rgba(239,68,68,0.3)]"
           >
-            <Trash2 size={12} /> Remove Node
+            <Trash2 size={14} /> Remove Node
           </button>
         </div>
       </div>
+    </div>
     </div>
   );
 }

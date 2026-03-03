@@ -28,23 +28,23 @@ export default function Sidebar() {
   const violations = useStore(s => s.violations);
 
   return (
-    <div className="flex h-full shrink-0">
+    <div className="flex h-full shrink-0 mt-3 ml-2 mb-2 bg-transparent gap-2 pointer-events-none">
       {/* Icon rail */}
-      <div className="w-12 bg-aether-surface border-r border-aether-border flex flex-col items-center py-2 gap-1">
+      <div className="w-14 glass-panel border border-aether-border flex flex-col items-center py-3 gap-2 pointer-events-auto shadow-2xl overflow-hidden">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setSidebarTab(tab.id)}
-            className={`relative w-10 h-10 flex items-center justify-center rounded-lg transition ${
+            className={`relative w-10 h-10 flex items-center justify-center rounded-full transition icon-container ${
               sidebarTab === tab.id
-                ? 'bg-aether-accent/20 text-aether-accent'
+                ? 'bg-aether-accent/20 text-aether-accent border-aether-accent/50'
                 : 'text-aether-muted hover:bg-aether-bg hover:text-aether-text'
             }`}
             title={tab.label}
           >
             <tab.icon size={18} />
             {tab.id === 'rules' && violations.length > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-aether-danger text-white text-[9px] flex items-center justify-center font-bold">
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-aether-danger text-white text-[9px] flex items-center justify-center font-bold shadow-[0_0_8px_rgba(239,68,68,0.8)]">
                 {violations.length > 9 ? '9+' : violations.length}
               </span>
             )}
@@ -53,8 +53,8 @@ export default function Sidebar() {
       </div>
 
       {/* Panel content */}
-      <div className="w-72 bg-aether-surface border-r border-aether-border overflow-y-auto">
-        <div className="p-3">
+      <div className="w-80 glass-panel border border-aether-border overflow-y-auto pointer-events-auto shadow-2xl mr-2">
+        <div className="p-4">
           {sidebarTab === 'nodes' && <NodePalette />}
           {sidebarTab === 'inference' && <InferencePanel />}
           {sidebarTab === 'rules' && <RulesPanel />}

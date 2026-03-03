@@ -66,7 +66,7 @@ function WelcomeScreen() {
           </p>
         </div>
 
-        <div className="bg-aether-surface border border-aether-border rounded-xl p-6 space-y-4">
+        <div className="bg-aether-surface border border-aether-border rounded-xl p-6 space-y-4 glass-panel">
           {/* Create new */}
           <div>
             <label className="text-[11px] text-aether-muted uppercase tracking-wider mb-1.5 block">
@@ -78,13 +78,13 @@ function WelcomeScreen() {
                 onChange={e => setEnvName(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleCreate()}
                 placeholder="My Architecture"
-                className="flex-1 bg-aether-bg border border-aether-border rounded-lg px-3 py-2 text-sm outline-none focus:border-aether-accent transition"
+                className="flex-1 bg-aether-bg border border-aether-border rounded-full px-4 py-2 text-sm outline-none focus:border-aether-accent transition"
                 autoFocus
               />
               <button
                 onClick={handleCreate}
                 disabled={creating}
-                className="px-4 py-2 rounded-lg bg-aether-accent text-white text-sm font-medium hover:bg-aether-accent-light transition disabled:opacity-50 flex items-center gap-2"
+                className="px-5 py-2 glass-btn-primary flex items-center gap-2 font-medium text-sm disabled:opacity-50"
               >
                 <Plus size={16} /> Create
               </button>
@@ -100,11 +100,13 @@ function WelcomeScreen() {
           {/* Quick start (no backend needed) */}
           <button
             onClick={handleQuickStart}
-            className="w-full p-3 rounded-lg bg-aether-bg border border-aether-border hover:border-aether-accent/40 transition text-left group"
+            className="w-full p-4 rounded-xl glass-panel group hover:border-aether-accent/40 transition text-left"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <FolderGit2 size={18} className="text-aether-accent" />
+                <div className="icon-container">
+                  <FolderGit2 size={18} className="text-aether-accent" />
+                </div>
                 <div>
                   <div className="text-sm font-medium text-aether-text">Quick Start</div>
                   <div className="text-[11px] text-aether-muted">Start modeling in-memory (no database required)</div>
