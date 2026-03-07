@@ -1,8 +1,8 @@
 /**
- * AetherOS — Right Property Panel (Node Inspector + Runtime Assignment)
+ * AetherOS — Right Property Panel (Node Inspector + Edge Inspector + Runtime Assignment)
  */
 import React from 'react';
-import { X, Box, Trash2 } from 'lucide-react';
+import { X, Box, Trash2, ArrowRight } from 'lucide-react';
 import useStore from '../store/useStore';
 
 const runtimes = ['node', 'bun', 'deno', 'python', 'go', 'rust', 'java', 'ruby', 'php', '.net', 'unknown'];
@@ -11,15 +11,95 @@ const nodeTypes = ['service', 'api', 'frontend', 'database', 'cache', 'queue', '
 
 export default function RightPanel() {
   const selectedNodeId = useStore(s => s.selectedNodeId);
+  const selectedEdgeId = useStore(s => s.selectedEdgeId);
   const nodes = useStore(s => s.nodes);
+  const edges = useStore(s => s.edges);
   const rightPanelOpen = useStore(s => s.rightPanelOpen);
   const rightPanelTab = useStore(s => s.rightPanelTab);
   const setRightPanelTab = useStore(s => s.setRightPanelTab);
   const updateNode = useStore(s => s.updateNode);
+  const updateEdge = useStore(s => s.updateEdge);
   const removeNode = useStore(s => s.removeNode);
+  const removeEdge = useStore(s => s.removeEdge);
   const setSelectedNode = useStore(s => s.setSelectedNode);
+  const setSelectedEdge = useStore(s => s.setSelectedEdge);
 
-  if (!rightPanelOpen || !selectedNodeId) return null;
+  if (!rightPanelOpen) return null;
+
+  // --- Edge Inspector ---
+  if (selectedEdgeId && !selectedNodeId) {
+    const edge = edges.find(e => e.id === selectedEdgeId);
+    if (!edge) return null;
+    const sourceNode = nodes.find(n => n.id === edge.source);
+    const targetNode = nodes.find(n => n.id === edge.target);
+    return (
+      <div className="relative pointer-events-none w-80 shrink-0 h-full flex flex-col justify-start">
+        <div className="w-80 glass-panel border border-aether-border h-auto max-h-[calc(100%-1rem)] my-2 mr-2 overflow-y-auto animate-slide-in shrink-0 shadow-2xl z-50 pointer-events-auto flex flex-col absolute right-0">
+          <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/5 rounded-t-xl">
+            <div>
+              <h3 className="text-xs font-semibold text-aether-text flex items-center gap-1.5">
+                <ArrowRight size={13} className="text-aether-accent" /> Edge
+              </h3>
+              <span className="text-[10px] text-aether-muted font-mono">{selectedEdgeId.slice(0, 8)}…</span>
+            </div>
+            <button onClick={() => setSelectedEdge(null)} className="text-aether-muted hover:text-aether-text transition">
+              <X size={16} />
+            </button>
+          </div>
+          <div className="p-3 space-y-3">
+            <Field label="Connection">
+              <div className="flex items-center gap-2 text-xs font-mono text-aether-muted bg-aether-bg border border-aether-border rounded px-2.5 py-1.5">
+                <span className="text-aether-text truncate">{sourceNode?.data?.label || edge.source.slice(0, 8)}</span>
+                <ArrowRight size={12} className="text-aether-accent shrink-0" />
+                <span className="text-aether-text truncate">{targetNode?.data?.label || edge.target.slice(0, 8)}</span>
+              </div>
+            </Field>
+            <Field label="Label">
+              <input
+                value={edge.label || ''}
+                onChange={e => updateEdge(selectedEdgeId, { label: e.target.value })}
+                placeholder="e.g. depends_on, calls, publishes"
+                className="w-full bg-aether-bg border border-aether-border rounded px-2.5 py-1.5 text-xs outline-none focus:border-aether-accent transition"
+              />
+            </Field>
+            <Field label="Style">
+              <div className="flex gap-2">
+                {[false, true].map(animated => (
+                  <button
+                    key={String(animated)}
+                    onClick={() => updateEdge(selectedEdgeId, { animated })}
+                    className={`flex-1 py-1.5 rounded text-[10px] font-medium capitalize transition border ${
+                      !!edge.animated === animated
+                        ? 'bg-aether-accent/20 border-aether-accent/50 text-aether-accent'
+                        : 'bg-aether-bg border-aether-border text-aether-muted'
+                    }`}
+                  >
+                    {animated ? 'Animated' : 'Static'}
+                  </button>
+                ))}
+              </div>
+            </Field>
+            <Field label="Edge ID">
+              <code className="block text-[10px] font-mono text-aether-muted bg-aether-bg p-2 rounded border border-aether-border break-all">
+                {selectedEdgeId}
+              </code>
+            </Field>
+            <div className="pt-4 border-t border-white/5">
+              <button
+                onClick={() => { removeEdge(selectedEdgeId); setSelectedEdge(null); }}
+                className="w-full py-2 rounded-full bg-red-500/10 border border-red-500/30 text-red-500 text-xs font-medium hover:bg-red-500/20 transition flex items-center justify-center gap-2"
+              >
+                <Trash2 size={14} /> Remove Edge
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- Node Inspector ---
+  if (!selectedNodeId) return null;
 
   const node = nodes.find(n => n.id === selectedNodeId);
   if (!node) return null;

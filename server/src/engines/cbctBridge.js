@@ -127,16 +127,19 @@ function flattenTree(tree, basePath) {
     files.push({ name: tree.name, relativePath: rel.replace(/\\/g, '/') });
   } else if (tree.children) {
     // For the root call (basePath === ''), skip prepending the root dir name
-    const nextBase = basePath === '' ? '' : (basePath ? path.join(basePath, tree.name) : tree.name);
-    const childBase = basePath === '' ? '' : nextBase;
     for (const child of tree.children) {
-      // If this is the root level (basePath empty), children get their own name as base
       if (basePath === '' && child.type === 'directory') {
+        // Root-level directory: child's own name becomes its base
         files.push(...flattenTree(child, child.name));
       } else if (basePath === '' && child.type === 'file') {
+        // Root-level file
         files.push({ name: child.name, relativePath: child.name });
+      } else if (child.type === 'directory') {
+        // Nested directory: append child name to current base path
+        files.push(...flattenTree(child, `${basePath}/${child.name}`));
       } else {
-        files.push(...flattenTree(child, childBase));
+        // Nested file: just record path directly without recursing
+        files.push({ name: child.name, relativePath: `${basePath}/${child.name}`.replace(/\\/g, '/') });
       }
     }
   }

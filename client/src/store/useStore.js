@@ -32,6 +32,7 @@ const useStore = create(
   // --- CBCT / Structural Intelligence ---
   cbctData: null,
   selectedNodeId: null,
+  selectedEdgeId: null,
 
   // --- Event Log ---
   events: [],
@@ -133,8 +134,18 @@ const useStore = create(
   },
 
   removeEdge(edgeId) {
-    set(state => ({ edges: state.edges.filter(e => e.id !== edgeId) }));
+    set(state => ({
+      edges: state.edges.filter(e => e.id !== edgeId),
+      selectedEdgeId: state.selectedEdgeId === edgeId ? null : state.selectedEdgeId,
+      rightPanelOpen: state.selectedEdgeId === edgeId ? false : state.rightPanelOpen
+    }));
     get()._pushEvent('edge-removed', { edgeId });
+  },
+
+  updateEdge(edgeId, updates) {
+    set(state => ({
+      edges: state.edges.map(e => e.id === edgeId ? { ...e, ...updates } : e)
+    }));
   },
 
   onEdgesChange(changes) {
@@ -150,7 +161,11 @@ const useStore = create(
 
   // --- Selection ---
   setSelectedNode(nodeId) {
-    set({ selectedNodeId: nodeId, rightPanelOpen: !!nodeId, rightPanelTab: 'properties' });
+    set({ selectedNodeId: nodeId, selectedEdgeId: null, rightPanelOpen: !!nodeId, rightPanelTab: 'properties' });
+  },
+
+  setSelectedEdge(edgeId) {
+    set({ selectedEdgeId: edgeId, selectedNodeId: null, rightPanelOpen: !!edgeId, rightPanelTab: 'properties' });
   },
 
   // --- Environment Management ---

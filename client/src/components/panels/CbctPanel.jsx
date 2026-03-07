@@ -2,7 +2,7 @@
  * AetherOS — CBCT Structural Intelligence Panel
  */
 import React, { useState } from 'react';
-import { Search, FolderTree, AlertTriangle, FileCode, Loader2, Flame } from 'lucide-react';
+import { Search, FolderTree, AlertTriangle, FileCode, Loader2, Flame, GitMerge } from 'lucide-react';
 import useStore from '../../store/useStore';
 import api from '../../lib/api';
 
@@ -117,7 +117,7 @@ export default function CbctPanel() {
 
           {/* Tabs */}
           <div className="flex border-b border-aether-border mb-3">
-            {['tree', 'risks', 'cycles'].map(t => (
+            {['tree', 'risks', 'cycles', 'deps'].map(t => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
@@ -161,6 +161,41 @@ export default function CbctPanel() {
                       {cycle.join(' → ')}
                     </div>
                   ))
+                )}
+              </div>
+            )}
+
+            {tab === 'deps' && (
+              <div className="space-y-1">
+                {!cbctData.dependencies || cbctData.dependencies.length === 0 ? (
+                  <p className="text-[11px] text-aether-muted italic">No dependencies detected.</p>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-1.5 mb-2 text-[11px] text-aether-muted">
+                      <GitMerge size={11} />
+                      <span>{cbctData.dependencies.filter(d => d.type === 'local').length} local · {cbctData.dependencies.filter(d => d.type === 'external').length} external</span>
+                    </div>
+                    {cbctData.dependencies.slice(0, 100).map((dep, i) => (
+                      <div key={i} className="flex items-start gap-1.5 text-[10px] font-mono">
+                        <span
+                          className={`shrink-0 mt-0.5 px-1 rounded text-[9px] font-bold uppercase ${
+                            dep.type === 'local'
+                              ? 'bg-aether-accent/20 text-aether-accent'
+                              : 'bg-aether-surface text-aether-muted'
+                          }`}
+                        >
+                          {dep.type === 'local' ? 'loc' : 'ext'}
+                        </span>
+                        <div className="min-w-0">
+                          <div className="text-aether-muted truncate">{dep.source}</div>
+                          <div className="text-aether-text truncate">→ {dep.target}</div>
+                        </div>
+                      </div>
+                    ))}
+                    {cbctData.dependencies.length > 100 && (
+                      <p className="text-[10px] text-aether-muted mt-1">… and {cbctData.dependencies.length - 100} more</p>
+                    )}
+                  </>
                 )}
               </div>
             )}

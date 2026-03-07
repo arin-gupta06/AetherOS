@@ -4,7 +4,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Hexagon, FolderGit2, Save, RotateCcw, Activity,
-  ChevronDown, Plus
+  ChevronDown, Plus, Trash2
 } from 'lucide-react';
 import useStore from '../store/useStore';
 import api from '../lib/api';
@@ -93,12 +93,41 @@ export default function Header() {
   };
 
   const handleSelectEnv = async (env) => {
+    if (env._id === currentEnvironment?._id) { setEnvDropdown(false); return; }
+    // Guard: warn if there are unsaved nodes on the current environment
+    if (nodes.length > 0) {
+      const ok = window.confirm(
+        `Switch to "${env.name}"?\nUnsaved changes to "${currentEnvironment?.name || 'current workspace'}" will be lost.`
+      );
+      if (!ok) return;
+    }
     try {
       const full = await api.getEnvironment(env._id);
       setCurrentEnvironment(full);
       setEnvDropdown(false);
     } catch (err) {
       setNotification('Load failed: ' + err.message);
+    }
+  };
+
+  const handleDeleteEnv = async (e, env) => {
+    e.stopPropagation();
+    if (env._id.startsWith('__local__')) {
+      setNotification('Quick-start workspaces are in-memory only — nothing to delete.');
+      return;
+    }
+    if (!window.confirm(`Delete environment "${env.name}"?\nThis cannot be undone.`)) return;
+    try {
+      await api.deleteEnvironment(env._id);
+      const envs = await api.getEnvironments();
+      loadEnvironments(envs);
+      if (currentEnvironment?._id === env._id) {
+        setCurrentEnvironment(null);
+      }
+      setNotification(`Environment "${env.name}" deleted`);
+      setEnvDropdown(false);
+    } catch (err) {
+      setNotification('Delete failed: ' + err.message);
     }
   };
 
@@ -132,12 +161,23 @@ export default function Header() {
                 <button
                   key={env._id}
                   onClick={() => handleSelectEnv(env)}
-                  className="w-full text-left px-3 py-2 text-xs hover:bg-aether-accent/10 transition flex items-center justify-between"
+                  className="w-full text-left px-3 py-2 text-xs hover:bg-aether-accent/10 transition flex items-center justify-between group"
                 >
-                  <span>{env.name}</span>
-                  {env._id === currentEnvironment?._id && (
-                    <span className="text-aether-accent">●</span>
-                  )}
+                  <span className="truncate flex-1">{env.name}</span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {env._id === currentEnvironment?._id && (
+                      <span className="text-aether-accent">●</span>
+                    )}
+                    {!env._id.startsWith('__local__') && (
+                      <button
+                        onClick={(e) => handleDeleteEnv(e, env)}
+                        className="opacity-0 group-hover:opacity-100 text-aether-muted hover:text-aether-danger transition"
+                        title={`Delete "${env.name}"`}
+                      >
+                        <Trash2 size={11} />
+                      </button>
+                    )}
+                  </div>
                 </button>
               ))}
               <div className="border-t border-aether-border my-1" />

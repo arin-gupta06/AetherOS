@@ -38,6 +38,7 @@ function CanvasInner() {
   const onEdgesChange = useStore(s => s.onEdgesChange);
   const onConnect = useStore(s => s.onConnect);
   const setSelectedNode = useStore(s => s.setSelectedNode);
+  const setSelectedEdge = useStore(s => s.setSelectedEdge);
   const removeNode = useStore(s => s.removeNode);
   const removeEdge = useStore(s => s.removeEdge);
   const addNode = useStore(s => s.addNode);
@@ -46,18 +47,21 @@ function CanvasInner() {
 
   const onNodeClick = useCallback((_event, node) => {
     selectedEdgeRef.current = null;
+    setSelectedEdge(null);
     setSelectedNode(node.id);
-  }, [setSelectedNode]);
+  }, [setSelectedNode, setSelectedEdge]);
 
   const onEdgeClick = useCallback((_event, edge) => {
     setSelectedNode(null);
+    setSelectedEdge(edge.id);
     selectedEdgeRef.current = edge.id;
-  }, [setSelectedNode]);
+  }, [setSelectedNode, setSelectedEdge]);
 
   const onPaneClick = useCallback(() => {
     setSelectedNode(null);
+    setSelectedEdge(null);
     selectedEdgeRef.current = null;
-  }, [setSelectedNode]);
+  }, [setSelectedNode, setSelectedEdge]);
 
   // Keyboard shortcuts: Delete/Backspace to remove selected node or edge
   const onKeyDown = useCallback((event) => {

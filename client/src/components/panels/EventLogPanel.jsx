@@ -2,9 +2,10 @@
  * AetherOS — Event Log Panel
  * Centralized architectural event stream.
  */
-import React, { useState } from 'react';
-import { ScrollText, Trash2, Filter } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ScrollText, Trash2, Filter, RefreshCw } from 'lucide-react';
 import useStore from '../../store/useStore';
+import api from '../../lib/api';
 
 const eventTypeColors = {
   'node-added': '#10b981',
@@ -29,8 +30,40 @@ const severityFilters = ['all', 'error', 'warning', 'info'];
 export default function EventLogPanel() {
   const events = useStore(s => s.events);
   const [severityFilter, setSeverityFilter] = useState('all');
+  const [syncing, setSyncing] = useState(false);
+
+  // Load events from backend on mount and merge with local
+  useEffect(() => {
+    api.getEvents({ limit: 200 }).then(serverEvents => {
+      useStore.setState(state => {
+        const localIds = new Set(state.events.map(e => e.id));
+        const newEvents = serverEvents.filter(e => !localIds.has(e.id));
+        if (newEvents.length === 0) return state;
+        const merged = [...state.events, ...newEvents]
+          .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+          .slice(-1000);
+        return { events: merged };
+      });
+    }).catch(() => {});
+  }, []);
+
+  const handleSync = () => {
+    setSyncing(true);
+    api.getEvents({ limit: 200 }).then(serverEvents => {
+      useStore.setState(state => {
+        const localIds = new Set(state.events.map(e => e.id));
+        const newEvents = serverEvents.filter(e => !localIds.has(e.id));
+        if (newEvents.length === 0) return state;
+        const merged = [...state.events, ...newEvents]
+          .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+          .slice(-1000);
+        return { events: merged };
+      });
+    }).catch(() => {}).finally(() => setSyncing(false));
+  };
 
   const clearEvents = () => {
+    api.getEvents().then(() => api.postEvent({ type: 'noop' })).catch(() => {});
     useStore.setState({ events: [] });
   };
 
@@ -46,6 +79,14 @@ export default function EventLogPanel() {
         </h3>
         <div className="flex items-center gap-2">
           <span className="text-[10px] text-aether-muted font-mono">{filtered.length}</span>
+          <button
+            onClick={handleSync}
+            disabled={syncing}
+            className="text-aether-muted hover:text-aether-accent transition disabled:opacity-50"
+            title="Sync events from server"
+          >
+            <RefreshCw size={12} className={syncing ? 'animate-spin' : ''} />
+          </button>
           <button
             onClick={clearEvents}
             className="text-aether-muted hover:text-aether-danger transition"

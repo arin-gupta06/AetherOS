@@ -37,14 +37,26 @@ export default function useWebSocket() {
             const data = JSON.parse(event.data);
             const store = useStore.getState();
             switch (data.type) {
+              case 'event-logged': {
+                // Add backend-originated event to local log (deduplicate by id)
+                const evt = data.payload;
+                if (evt?.id) {
+                  useStore.setState(state => {
+                    if (state.events.find(e => e.id === evt.id)) return state;
+                    return { events: [...state.events.slice(-999), evt] };
+                  });
+                }
+                break;
+              }
               case 'environment-updated':
                 store.setNotification('Environment updated remotely');
                 break;
               case 'rule-validation':
                 store.setNotification(`Validation: ${data.payload?.violationCount ?? 0} violation(s)`);
+                store._pushEvent('rule-validation', data.payload || {}, 'warning');
                 break;
               case 'simulation-started':
-                store.setNotification('Simulation started remotely');
+                store.setNotification(`Simulation active — ${data.payload?.affectedCount ?? 0} node(s) affected`);
                 break;
               case 'simulation-ended':
                 store.setNotification('Simulation ended');
