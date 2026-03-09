@@ -140,7 +140,3 @@ Click **"Quick Start"** on the welcome screen to begin modeling immediately in m
 - **Boundary** — Infrastructure boundary
 
 ---
-
-## License
-
-MIT
