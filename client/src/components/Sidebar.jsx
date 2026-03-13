@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import {
-  Layers, GitBranch, Shield, Zap, Search, ScrollText
+  Layers, GitBranch, Shield, Zap, Search, ScrollText, Sparkles, Download
 } from 'lucide-react';
 import useStore from '../store/useStore';
 import NodePalette from './panels/NodePalette';
@@ -12,6 +12,8 @@ import RulesPanel from './panels/RulesPanel';
 import SimulationPanel from './panels/SimulationPanel';
 import CbctPanel from './panels/CbctPanel';
 import EventLogPanel from './panels/EventLogPanel';
+import AiArchitectureAdvisorPanel from './panels/AiArchitectureAdvisorPanel';
+import ArchitectureExportPanel from './panels/ArchitectureExportPanel';
 
 const tabs = [
   { id: 'nodes', icon: Layers, label: 'Nodes' },
@@ -19,7 +21,9 @@ const tabs = [
   { id: 'rules', icon: Shield, label: 'Rules' },
   { id: 'simulation', icon: Zap, label: 'Simulate' },
   { id: 'cbct', icon: Search, label: 'CBCT' },
-  { id: 'events', icon: ScrollText, label: 'Events' }
+  { id: 'events', icon: ScrollText, label: 'Events' },
+  { id: 'ai-advisor', icon: Sparkles, label: 'AI Advisor' },
+  { id: 'export', icon: Download, label: 'Export' }
 ];
 
 export default function Sidebar() {
@@ -61,6 +65,8 @@ export default function Sidebar() {
           {sidebarTab === 'simulation' && <SimulationPanel />}
           {sidebarTab === 'cbct' && <CbctPanel />}
           {sidebarTab === 'events' && <EventLogPanel />}
+          {sidebarTab === 'ai-advisor' && <AiArchitectureAdvisorPanel />}
+          {sidebarTab === 'export' && <ArchitectureExportPanel />}
         </div>
       </div>
     </div>

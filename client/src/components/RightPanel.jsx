@@ -2,12 +2,21 @@
  * AetherOS — Right Property Panel (Node Inspector + Edge Inspector + Runtime Assignment)
  */
 import React from 'react';
-import { X, Box, Trash2, ArrowRight } from 'lucide-react';
+import { X, Box, Trash2, ArrowRight, Cloud } from 'lucide-react';
 import useStore from '../store/useStore';
 
 const runtimes = ['node', 'bun', 'deno', 'python', 'go', 'rust', 'java', 'ruby', 'php', '.net', 'unknown'];
 const envTypes = ['container', 'local', 'serverless'];
 const nodeTypes = ['service', 'api', 'frontend', 'database', 'cache', 'queue', 'worker', 'runtime', 'container', 'boundary'];
+const cloudProviders = ['Local', 'Azure', 'AWS', 'GCP'];
+
+const azureInstanceTypes = ['Standard B1', 'Standard B2s', 'Standard D2s', 'Standard F2s', 'Premium OP1'];
+const awsInstanceTypes = ['t2.micro', 't2.small', 't2.medium', 'm5.large', 'm5.xlarge', 'c5.large'];
+const gcpInstanceTypes = ['e2-micro', 'e2-small', 'e2-medium', 'n2-standard-2', 'n2-standard-4'];
+
+const azureRegions = ['eastus', 'westus', 'northeurope', 'westeurope', 'southeastasia', 'eastasia'];
+const awsRegions = ['us-east-1', 'us-west-2', 'eu-west-1', 'ap-southeast-1', 'ap-northeast-1'];
+const gcpRegions = ['us-central1', 'us-east1', 'europe-west1', 'asia-east1', 'asia-southeast1'];
 
 export default function RightPanel() {
   const selectedNodeId = useStore(s => s.selectedNodeId);
@@ -129,7 +138,7 @@ export default function RightPanel() {
 
       {/* Tabs */}
       <div className="flex border-b border-aether-border">
-        {['properties', 'runtime', 'metadata'].map(tab => (
+        {['properties', 'runtime', 'cloud', 'metadata'].map(tab => (
           <button
             key={tab}
             onClick={() => setRightPanelTab(tab)}
@@ -139,6 +148,7 @@ export default function RightPanel() {
                 : 'border-transparent text-aether-muted hover:text-aether-text'
             }`}
           >
+            {tab === 'cloud' ? <Cloud size={12} className="inline mr-1" /> : null}
             {tab}
           </button>
         ))}
@@ -265,6 +275,127 @@ export default function RightPanel() {
                 className="w-full bg-aether-bg border border-aether-border rounded px-2.5 py-1.5 text-xs outline-none focus:border-aether-accent transition"
               />
             </Field>
+          </>
+        )}
+
+        {rightPanelTab === 'cloud' && (
+          <>
+            <Field label="Cloud Provider">
+              <select
+                value={data.cloudProvider || 'Local'}
+                onChange={e => {
+                  handleUpdate('cloudProvider', e.target.value);
+                  // Reset region and instance type on provider change
+                  const cloudConfig = data.cloudConfiguration || {};
+                  handleUpdate('cloudConfiguration', { ...cloudConfig, region: '', instanceType: '' });
+                }}
+                className="w-full bg-aether-bg border border-aether-border rounded px-2.5 py-1.5 text-xs outline-none focus:border-aether-accent transition appearance-none"
+              >
+                {cloudProviders.map(provider => (
+                  <option key={provider} value={provider}>{provider}</option>
+                ))}
+              </select>
+            </Field>
+
+            {data.cloudProvider && data.cloudProvider !== 'Local' && (
+              <>
+                <Field label="Region">
+                  <select
+                    value={data.cloudConfiguration?.region || ''}
+                    onChange={e => {
+                      const cloudConfig = data.cloudConfiguration || {};
+                      handleUpdate('cloudConfiguration', { ...cloudConfig, region: e.target.value });
+                    }}
+                    className="w-full bg-aether-bg border border-aether-border rounded px-2.5 py-1.5 text-xs outline-none focus:border-aether-accent transition appearance-none"
+                  >
+                    <option value="">Select Region</option>
+                    {(data.cloudProvider === 'Azure' ? azureRegions :
+                      data.cloudProvider === 'AWS' ? awsRegions :
+                      data.cloudProvider === 'GCP' ? gcpRegions : []).map(region => (
+                      <option key={region} value={region}>{region}</option>
+                    ))}
+                  </select>
+                </Field>
+
+                <Field label="Instance Type">
+                  <select
+                    value={data.cloudConfiguration?.instanceType || ''}
+                    onChange={e => {
+                      const cloudConfig = data.cloudConfiguration || {};
+                      handleUpdate('cloudConfiguration', { ...cloudConfig, instanceType: e.target.value });
+                    }}
+                    className="w-full bg-aether-bg border border-aether-border rounded px-2.5 py-1.5 text-xs outline-none focus:border-aether-accent transition appearance-none"
+                  >
+                    <option value="">Select Instance Type</option>
+                    {(data.cloudProvider === 'Azure' ? azureInstanceTypes :
+                      data.cloudProvider === 'AWS' ? awsInstanceTypes :
+                      data.cloudProvider === 'GCP' ? gcpInstanceTypes : []).map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </Field>
+
+                <Field label="Tier/SKU">
+                  <input
+                    value={data.cloudConfiguration?.tier || ''}
+                    onChange={e => {
+                      const cloudConfig = data.cloudConfiguration || {};
+                      handleUpdate('cloudConfiguration', { ...cloudConfig, tier: e.target.value });
+                    }}
+                    placeholder={data.cloudProvider === 'Azure' ? 'e.g. Free, Standard, Premium' : 'e.g. Standard, Premium'}
+                    className="w-full bg-aether-bg border border-aether-border rounded px-2.5 py-1.5 text-xs outline-none focus:border-aether-accent transition"
+                  />
+                </Field>
+
+                <Field label="Replicas">
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={data.cloudConfiguration?.replicas || 1}
+                    onChange={e => {
+                      const cloudConfig = data.cloudConfiguration || {};
+                      handleUpdate('cloudConfiguration', { ...cloudConfig, replicas: Math.max(1, parseInt(e.target.value) || 1) });
+                    }}
+                    className="w-full bg-aether-bg border border-aether-border rounded px-2.5 py-1.5 text-xs outline-none focus:border-aether-accent transition font-mono"
+                  />
+                </Field>
+
+                <Field label="Auto-Scale">
+                  <div className="flex gap-2 items-center">
+                    <button
+                      onClick={() => {
+                        const cloudConfig = data.cloudConfiguration || {};
+                        handleUpdate('cloudConfiguration', { ...cloudConfig, autoScale: !cloudConfig.autoScale });
+                      }}
+                      className={`flex-1 py-1.5 rounded text-[10px] font-medium capitalize transition border ${
+                        data.cloudConfiguration?.autoScale
+                          ? 'bg-green-500/20 border-green-500/50 text-green-400'
+                          : 'bg-aether-bg border-aether-border text-aether-muted'
+                      }`}
+                    >
+                      {data.cloudConfiguration?.autoScale ? 'Enabled' : 'Disabled'}
+                    </button>
+                  </div>
+                </Field>
+
+                {data.cloudConfiguration?.autoScale && (
+                  <Field label="Max Replicas">
+                    <input
+                      type="number"
+                      min="1"
+                      max="1000"
+                      value={data.cloudConfiguration?.maxReplicas || 10}
+                      onChange={e => {
+                        const cloudConfig = data.cloudConfiguration || {};
+                        handleUpdate('cloudConfiguration', { ...cloudConfig, maxReplicas: Math.max(1, parseInt(e.target.value) || 10) });
+                      }}
+                      className="w-full bg-aether-bg border border-aether-border rounded px-2.5 py-1.5 text-xs outline-none focus:border-aether-accent transition font-mono"
+                    />
+                  </Field>
+                )}
+              </>
+            )}
           </>
         )}
 

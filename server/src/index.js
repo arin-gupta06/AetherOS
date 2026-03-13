@@ -4,14 +4,25 @@ const http = require('http');
 const { WebSocketServer } = require('ws');
 const mongoose = require('mongoose');
 
+console.log('[AetherOS] Initializing...');
+
 const environmentRoutes = require('./routes/environments');
 const inferenceRoutes = require('./routes/inference');
 const rulesRoutes = require('./routes/rules');
 const simulationRoutes = require('./routes/simulation');
 const cbctRoutes = require('./routes/cbct');
 const eventRoutes = require('./routes/events');
+const azureRoutes = require('./routes/azure');
+const azureInfrastructureRoutes = require('./routes/azure-infrastructure');
+const githubRoutes = require('./routes/github');
+const aiRoutes = require('./routes/ai');
+const architectureRoutes = require('./routes/architecture');
+
+console.log('[AetherOS] All routes imported successfully');
 
 const { broadcastEvent } = require('./ws/broadcast');
+
+console.log('[AetherOS] Creating Express app and HTTP server');
 
 const app = express();
 const server = http.createServer(app);
@@ -43,6 +54,11 @@ app.use('/api/rules', rulesRoutes);
 app.use('/api/simulation', simulationRoutes);
 app.use('/api/cbct', cbctRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/azure', azureRoutes);
+app.use('/api/azure', azureInfrastructureRoutes);
+app.use('/api/github', githubRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/architecture', architectureRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {
@@ -64,11 +80,23 @@ const PORT = process.env.PORT || 4000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/aetheros';
 
 async function start() {
+  console.log('[AetherOS] Starting server...');
+  
+  // Try MongoDB connection with a timeout
+  console.log('[DB] Attempting to connect to MongoDB...');
   try {
-    await mongoose.connect(MONGO_URI);
+    const connectPromise = mongoose.connect(MONGO_URI, {
+      serverSelectionTimeoutMS: 3000,
+      connectTimeoutMS: 3000
+    });
+    await Promise.race([
+      connectPromise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 5000))
+    ]);
     console.log('[DB] Connected to MongoDB');
   } catch (err) {
     console.warn('[DB] MongoDB unavailable — running in memory-only mode');
+    console.warn('[DB] Reason:', err.message);
   }
 
   server.listen(PORT, () => {

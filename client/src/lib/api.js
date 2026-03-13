@@ -52,6 +52,15 @@ export const api = {
   },
   postEvent: (event) => request('/events', { method: 'POST', body: JSON.stringify(event) }),
 
+  // AI Architecture Advisor
+  analyzeArchitecture: (nodes, edges) =>
+    request('/ai/analyze-architecture', { method: 'POST', body: JSON.stringify({ nodes, edges }) }),
+
+  // Architecture Export
+  exportArchitecture: (nodes, edges) =>
+    request('/architecture/export', { method: 'POST', body: JSON.stringify({ nodes, edges }) }),
+  getArchitectureTemplates: () => request('/architecture/templates'),
+
   // Health
   health: () => request('/health')
 };

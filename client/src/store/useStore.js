@@ -77,7 +77,17 @@ const useStore = create(
         permissions: nodeData.permissions || [],
         boundary: nodeData.boundary || '',
         metadata: nodeData.metadata || {},
-        status: nodeData.status || 'healthy'
+        status: nodeData.status || 'healthy',
+        cloudProvider: nodeData.cloudProvider || 'Local',
+        cloudConfiguration: nodeData.cloudConfiguration || {
+          region: '',
+          instanceType: '',
+          tier: '',
+          replicas: 1,
+          autoScale: false,
+          maxReplicas: 10,
+          customProps: {}
+        }
       }
     };
 
