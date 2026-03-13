@@ -298,7 +298,3 @@ See [CLOUD_SERVICES_GUIDE.md](./CLOUD_SERVICES_GUIDE.md) for complete documentat
 - **Boundary** — Infrastructure boundary
 
 ---
-
-## License
-
-MIT
