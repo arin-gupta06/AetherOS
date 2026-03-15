@@ -9,9 +9,15 @@ import {
   analyzeArchitectureWithAzure,
   getAzureDeploymentSuggestion,
   analyzeScalabilityWithAzure,
-} from '../lib/azureApi';
+} from '../../lib/azureApi';
+import useStore from '../../store/useStore';
 
-export default function AzureAdvisorPanel({ architecture, nodes, edges }) {
+export default function AzureAdvisorPanel() {
+  const nodes = useStore(s => s.nodes);
+  const edges = useStore(s => s.edges);
+  // Build a serializable architecture description from the current canvas
+  const architecture = nodes.map(n => ({ id: n.id, label: n.data?.label, type: n.data?.nodeType }));
+
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null);
   const [deploymentSuggestion, setDeploymentSuggestion] = useState(null);

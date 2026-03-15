@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Building2, AlertCircle, Loader } from 'lucide-react';
-import { getAzureReferenceArchitectures, getAzureReferenceArchitecture } from '../lib/azureApi';
+import { getAzureReferenceArchitectures, getAzureReferenceArchitecture } from '../../lib/azureApi';
 
 export default function AzureReferenceArchitecturesPanel({ onImportArchitecture }) {
   const [architectures, setArchitectures] = useState([]);
@@ -47,12 +47,10 @@ export default function AzureReferenceArchitecturesPanel({ onImportArchitecture 
 
   const handleImport = () => {
     if (selectedArchitecture && onImportArchitecture) {
-      onImportArchitecture({
-        nodes: selectedArchitecture.nodes,
-        edges: selectedArchitecture.edges,
-        name: selectedArchitecture.name,
-        description: selectedArchitecture.description,
-      });
+      onImportArchitecture(
+        selectedArchitecture.nodes || [],
+        selectedArchitecture.edges || [],
+      );
     }
   };
 

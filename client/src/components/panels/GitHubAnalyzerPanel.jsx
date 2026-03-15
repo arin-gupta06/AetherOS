@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { Github, Code2, AlertCircle, Loader } from 'lucide-react';
-import { analyzeGitHubRepository } from '../lib/azureApi';
+import { analyzeGitHubRepository } from '../../lib/azureApi';
 
 export default function GitHubAnalyzerPanel() {
   const [repositoryUrl, setRepositoryUrl] = useState('');

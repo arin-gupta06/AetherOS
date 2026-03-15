@@ -96,6 +96,25 @@ const useStore = create(
     return node;
   },
 
+  /** Bulk-add multiple pre-formed nodes to the canvas (non-destructive append) */
+  addNodes(newNodes) {
+    if (!newNodes?.length) return;
+    const validated = newNodes.map(n => ({
+      id: n.id || uuidv4(),
+      type: n.type || 'service',
+      position: n.position || { x: Math.random() * 600 + 100, y: Math.random() * 400 + 100 },
+      data: {
+        label: n.data?.label || n.label || 'Service',
+        nodeType: n.data?.nodeType || n.type || 'service',
+        status: n.data?.status || 'healthy',
+        metadata: n.data?.metadata || {},
+        ...n.data,
+      },
+    }));
+    set(state => ({ nodes: [...state.nodes, ...validated] }));
+    get()._pushEvent('nodes-bulk-added', { count: validated.length });
+  },
+
   removeNode(nodeId) {
     const node = get().nodes.find(n => n.id === nodeId);
     const orphanedEdges = get().edges.filter(e => e.source === nodeId || e.target === nodeId);
@@ -141,6 +160,23 @@ const useStore = create(
     set(state => ({ edges: [...state.edges, edge] }));
     get()._pushEvent('edge-added', { edgeId: id, source: edge.source, target: edge.target });
     return edge;
+  },
+
+  /** Bulk-add multiple pre-formed edges to the canvas (non-destructive append) */
+  addEdges(newEdges) {
+    if (!newEdges?.length) return;
+    const validated = newEdges.map(e => ({
+      id: e.id || uuidv4(),
+      source: e.source,
+      target: e.target,
+      label: e.label || '',
+      type: 'smoothstep',
+      animated: e.animated || false,
+      style: { stroke: '#6366f1' },
+      data: e.data || {},
+    }));
+    set(state => ({ edges: [...state.edges, ...validated] }));
+    get()._pushEvent('edges-bulk-added', { count: validated.length });
   },
 
   removeEdge(edgeId) {
