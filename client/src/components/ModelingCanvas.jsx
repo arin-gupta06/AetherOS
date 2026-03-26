@@ -49,14 +49,14 @@ function CanvasInner() {
     selectedEdgeRef.current = null;
     setSelectedEdge(null);
     setSelectedNode(node.id);
-    
-    // Connect to CBCT: If a node is clicked, we might want to highlight its specific structure
-    // Automatically switch to CBCT tab if available
-    const currentTab = useStore.getState().sidebarTab;
-    if (currentTab !== 'cbct') {
-      // Just set the selected node, the CBCT panel can listen to it
-    }
   }, [setSelectedNode, setSelectedEdge]);
+
+  const onNodeDoubleClick = useCallback((_event, node) => {
+    // Transition to CODE view with the selected node
+    // This will trigger CBCT analysis and display code view
+    const enterCodeView = useStore.getState().enterCodeView;
+    enterCodeView(node.id);
+  }, []);
 
   const onEdgeClick = useCallback((_event, edge) => {
     setSelectedNode(null);
@@ -120,6 +120,7 @@ function CanvasInner() {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onNodeClick={onNodeClick}
+        onNodeDoubleClick={onNodeDoubleClick}
         onEdgeClick={onEdgeClick}
         onPaneClick={onPaneClick}
         onDragOver={onDragOver}

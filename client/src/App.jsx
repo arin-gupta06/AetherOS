@@ -8,6 +8,7 @@ import Sidebar from './components/Sidebar';
 import ModelingCanvas from './components/ModelingCanvas';
 import RightPanel from './components/RightPanel';
 import Notification from './components/Notification';
+import CBCTWrapper from './components/CBCTWrapper';
 import useWebSocket from './hooks/useWebSocket';
 import useStore from './store/useStore';
 import api from './lib/api';
@@ -127,6 +128,10 @@ function WelcomeScreen() {
 
 export default function App() {
   const currentEnvironment = useStore(s => s.currentEnvironment);
+  const viewMode = useStore(s => s.viewMode);
+  const selectedNodeId = useStore(s => s.selectedNodeId);
+  const lastInferredRepo = useStore(s => s.lastInferredRepo);
+  const nodes = useStore(s => s.nodes);
   const loadEnvironments = useStore(s => s.loadEnvironments);
   const setNotification = useStore(s => s.setNotification);
 
@@ -148,12 +153,34 @@ export default function App() {
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-aether-bg">
       <Header />
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar />
-        <main className="flex-1 overflow-hidden">
-          <ModelingCanvas />
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Sidebar - Hidden in CODE view */}
+        <div className={`transition-all duration-300 ${viewMode === 'CODE' ? '-translate-x-full absolute opacity-0 pointer-events-none' : 'translate-x-0 relative'} h-full flex flex-col`}>
+          <Sidebar />
+        </div>
+        
+        {/* Main Canvas Area */}
+        <main className="flex-1 overflow-hidden relative">
+          {/* ARCHITECTURE View */}
+          <div className={`absolute inset-0 transition-opacity duration-500 ${viewMode === 'CODE' ? 'opacity-0 pointer-events-none z-0' : 'opacity-100 z-10'}`}>
+            <ModelingCanvas />
+          </div>
+
+          {/* CODE View - CBCT Embedded */}
+          {viewMode === 'CODE' && (
+            <div className="absolute inset-0 z-[100] animate-in fade-in zoom-in-95 duration-500 overflow-hidden">
+              <CBCTWrapper 
+                nodeId={selectedNodeId} 
+                repoPath={nodes.find(n => n.id === selectedNodeId)?.data?.metadata?.repoPath || lastInferredRepo || ''} 
+              />
+            </div>
+          )}
         </main>
-        <RightPanel />
+
+        {/* Right Panel - Hidden in CODE view */}
+        <div className={`transition-all duration-300 ${viewMode === 'CODE' ? 'translate-x-full absolute right-0 opacity-0 pointer-events-none' : 'translate-x-0 relative'} h-full flex flex-col`}>
+          <RightPanel />
+        </div>
       </div>
       <Notification />
     </div>

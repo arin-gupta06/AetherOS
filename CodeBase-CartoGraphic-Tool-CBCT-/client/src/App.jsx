@@ -10,30 +10,49 @@ import { GooeyText } from '@/components/ui/gooey-text-morphing';
 import { useStore } from './store/useStore';
 import BackgroundAnimation from './components/ui/BackgroundAnimation';
 
-function App() {
-  const { repositoryPath, isLoading, graphData, error } = useStore();
+/**
+ * CBCT App Component
+ * 
+ * Can run as:
+ * 1. Standalone application (embeddedMode=false)
+ * 2. Embedded in AetherOS (embeddedMode=true, repoPath provided)
+ */
+function App({ embeddedMode = false, repoPath = null }) {
+  const { repositoryPath, isLoading, graphData, error, setRepositoryPath } = useStore();
 
-  const showWelcome = !repositoryPath && !isLoading;
-  const showGraph = repositoryPath && graphData && !error;
+  // In embedded mode, auto-load the repo path
+  React.useEffect(() => {
+    if (embeddedMode && repoPath && !repositoryPath) {
+      setRepositoryPath(repoPath);
+    }
+  }, [embeddedMode, repoPath, repositoryPath, setRepositoryPath]);
+
+  // Determine what to show
+  // In embedded mode: skip welcome screen entirely
+  // In standalone mode: show welcome if no repo path
+  const isEmbedded = embeddedMode && repoPath;
+  const showWelcome = !isEmbedded && !repositoryPath && !isLoading;
+  const showGraph = (isEmbedded || repositoryPath) && graphData && !error;
   const showError = error && !isLoading;
 
   return (
     <div className="h-screen w-screen flex flex-col bg-cbct-bg text-cbct-text font-sans overflow-hidden">
-      <Header />
+      {/* Hide header in embedded mode */}
+      {!isEmbedded && <Header />}
       
       {/* Loading Toast - shows info during analysis */}
       <LoadingToast isVisible={isLoading} />
       
       <div className="flex-1 flex overflow-hidden relative">
-        {/* Background Effects (Hero Style) - Only for Graph view background context if needed, but usually graph has its own */}
+        {/* Background Effects */}
         
-        {/* Left Sidebar - Add top margin to span below header */}
-        <div className={`${showWelcome ? 'hidden' : 'block'} pt-16 h-full`}>
+        {/* Left Sidebar - hidden in embedded mode */}
+        <div className={`${showWelcome || isEmbedded ? 'hidden' : 'block'} ${isEmbedded ? '' : 'pt-16'} h-full`}>
            <Sidebar />
         </div>
         
         {/* Main Content */}
-        <main className={`flex-1 relative z-10 w-full h-full ${showWelcome ? '' : 'pt-16'}`}>
+        <main className={`flex-1 relative z-10 w-full h-full ${showWelcome ? '' : isEmbedded ? '' : 'pt-16'}`}>
           {showWelcome && <WelcomeScreen />}
           
           {isLoading && (

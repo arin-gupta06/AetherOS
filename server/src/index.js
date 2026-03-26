@@ -18,6 +18,11 @@ const githubRoutes = require('./routes/github');
 const aiRoutes = require('./routes/ai');
 const architectureRoutes = require('./routes/architecture');
 
+// Mount CBCT native backend routes
+const cbctAnalysisRoutes = require('../../CodeBase-CartoGraphic-Tool-CBCT-/server/src/routes/analysis');
+const cbctGraphRoutes = require('../../CodeBase-CartoGraphic-Tool-CBCT-/server/src/routes/graph');
+const cbctRepositoryRoutes = require('../../CodeBase-CartoGraphic-Tool-CBCT-/server/src/routes/repository');
+
 console.log('[AetherOS] All routes imported successfully');
 
 const { broadcastEvent } = require('./ws/broadcast');
@@ -59,6 +64,11 @@ app.use('/api/azure', azureInfrastructureRoutes);
 app.use('/api/github', githubRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/architecture', architectureRoutes);
+
+// CBCT Native Routes
+app.use('/api/analysis', cbctAnalysisRoutes);
+app.use('/api/graph', cbctGraphRoutes);
+app.use('/api/repository', cbctRepositoryRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

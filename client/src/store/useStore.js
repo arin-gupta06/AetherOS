@@ -31,6 +31,9 @@ const useStore = create(
 
   // --- CBCT / Structural Intelligence ---
   cbctData: null,
+  cbctActiveNodeId: null, // Which node is currently being inspected in CODE view
+  cbctLoading: false, // Is CBCT analysis in progress
+  cbctError: null, // Latest CBCT error
   selectedNodeId: null,
   selectedEdgeId: null,
 
@@ -38,6 +41,7 @@ const useStore = create(
   events: [],
 
   // --- UI State ---
+  viewMode: 'ARCHITECTURE', // 'ARCHITECTURE' | 'CODE'
   sidebarTab: 'nodes',
   rightPanelOpen: false,
   rightPanelTab: 'properties',
@@ -233,7 +237,10 @@ const useStore = create(
     set({ environments: envList });
   },
 
-  // --- Graph Import (from inference) ---
+/**
+ * Import architecture inferred from GitHub/repository analysis
+ * Also queues CBCT analysis in background for instant CODE view loading
+ */
   importInferredGraph(result) {
     const newNodes = (result.nodes || []).map(n => ({
       id: n.id,
@@ -260,11 +267,22 @@ const useStore = create(
       style: { stroke: '#6366f1' }
     }));
 
-    set({ nodes: newNodes, edges: newEdges, lastInferredRepo: result.repoPath || result.path || null });
+    const repoPath = result.repoPath || result.path || null;
+    set({ nodes: newNodes, edges: newEdges, lastInferredRepo: repoPath });
     get()._pushEvent('architecture-inferred', {
       nodeCount: newNodes.length,
-      edgeCount: newEdges.length
+      edgeCount: newEdges.length,
+      repoPath
     });
+
+    // Queue CBCT prefetch in background (non-blocking)
+    if (repoPath) {
+      import('../services/prefetch.js').then(({ queuePrefetch }) => {
+        queuePrefetch(repoPath);
+      }).catch(err => {
+        console.warn('Failed to queue CBCT prefetch:', err);
+      });
+    }
   },
 
   // --- Rules & Governance ---
@@ -346,7 +364,100 @@ const useStore = create(
     set({ lastInferredRepo: repo });
   },
 
+  /**
+   * Set active node for CODE view (CBCT inspection)
+   * @param {string} nodeId - Node ID to inspect
+   */
+  setCbctActiveNode(nodeId) {
+    set({ cbctActiveNodeId: nodeId });
+  },
+
+  /**
+   * Set CBCT loading state
+   * @param {boolean} loading - Is CBCT analyzing
+   */
+  setCbctLoading(loading) {
+    set({ cbctLoading: loading });
+  },
+
+  /**
+   * Set CBCT error state
+   * @param {string} error - Error message or null
+   */
+  setCbctError(error) {
+    set({ cbctError: error });
+  },
+
+  /**
+   * Transition to CODE view for a specific node
+   * Combines setCbctActiveNode, setViewMode, and selection
+   * @param {string} nodeId - Node to inspect
+   */
+  enterCodeView(nodeId) {
+    const node = get().nodes.find(n => n.id === nodeId);
+    if (!node) return;
+    
+    set({
+      viewMode: 'CODE',
+      cbctActiveNodeId: nodeId,
+      selectedNodeId: nodeId,
+      rightPanelOpen: true,
+      rightPanelTab: 'properties'
+    });
+    
+    get()._pushEvent('code-view-entered', {
+      nodeId,
+      nodeLabel: node.data?.label,
+      repoPath: get().lastInferredRepo
+    });
+  },
+
+  /**
+   * Exit CODE view and return to ARCHITECTURE
+   */
+  exitCodeView() {
+    set({
+      viewMode: 'ARCHITECTURE',
+      cbctActiveNodeId: null
+    });
+    get()._pushEvent('code-view-exited', {});
+  },
+
+  /**
+   * Apply CBCT analysis results to nodes as metadata
+   * Enriches node data with complexity, risk, dependency metrics
+   * @param {string} repoPath - Repository that was analyzed
+   * @param {Object} cbctData - CBCT analysis result
+   */
+  applyCBCTDataToNodes(repoPath, cbctData) {
+    if (!cbctData) return;
+
+    // Import the integration service
+    import('../services/cbctIntegration.js').then(({ 
+      transformCBCTToNodeMetadata, 
+      enrichNodesWithCBCTData 
+    }) => {
+      const cbctMetadata = transformCBCTToNodeMetadata(
+        cbctData.graphData,
+        cbctData.metrics
+      );
+
+      set(state => ({
+        nodes: enrichNodesWithCBCTData(state.nodes, cbctMetadata),
+        cbctData: { ...cbctData, repoPath }
+      }));
+
+      get()._pushEvent('cbct-data-applied', {
+        repoPath,
+        nodeCount: Object.keys(cbctMetadata).length
+      });
+    }).catch(err => {
+      console.warn('Failed to apply CBCT data:', err);
+    });
+  },
+
   // --- UI ---
+  setViewMode(mode) { set({ viewMode: mode }); },
   setSidebarTab(tab) { set({ sidebarTab: tab }); },
   setRightPanelTab(tab) { set({ rightPanelTab: tab }); },
   toggleRightPanel() { set(state => ({ rightPanelOpen: !state.rightPanelOpen })); },
