@@ -170,7 +170,7 @@ async function inferArchitecture(repoPath) {
       type: 'default'
     }));
 
-  return { nodes, edges: resolvedEdges, metadata: { serviceCount: nodes.length } };
+  return { nodes, edges: resolvedEdges, repoPath, metadata: { serviceCount: nodes.length } };
 }
 
 // --- Helpers ---

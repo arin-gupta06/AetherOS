@@ -29,10 +29,10 @@ router.post('/github', async (req, res) => {
     console.error('[Inference]', err);
     res.status(500).json({ error: err.message });
   } finally {
-    // Clean up cloned repo
-    if (repoPath) {
-      try { fs.rmSync(repoPath, { recursive: true, force: true }); } catch { /* ignore */ }
-    }
+    // Clean up cloned repo - DISABLED to allow CBCT analysis
+    // if (repoPath) {
+    //   try { fs.rmSync(repoPath, { recursive: true, force: true }); } catch { /* ignore */ }
+    // }
   }
 });
 

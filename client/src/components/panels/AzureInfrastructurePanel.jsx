@@ -1,3 +1,8 @@
+/**
+ * Azure Infrastructure Management Panel
+ * Create and configure Azure deployment components, AetherOS styled
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   Plus,
@@ -21,10 +26,6 @@ import {
   getDeploymentTemplate,
 } from '../../lib/azureInfrastructureApi';
 
-/**
- * Azure Infrastructure Management Panel
- * Create and configure Azure deployment components
- */
 export default function AzureInfrastructurePanel({ onNodeCreated, onTemplateLoaded }) {
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
@@ -187,55 +188,50 @@ export default function AzureInfrastructurePanel({ onNodeCreated, onTemplateLoad
   const getCategoryIcon = (category) => {
     switch (category) {
       case 'COMPUTE':
-        return <Cpu className="w-4 h-4" />;
+        return <Cpu className="w-3 h-3" />;
       case 'DATABASE':
-        return <Database className="w-4 h-4" />;
+        return <Database className="w-3 h-3" />;
       case 'AI':
-        return <Zap className="w-4 h-4" />;
+        return <Zap className="w-3 h-3" />;
       case 'STORAGE':
-        return <Archive className="w-4 h-4" />;
+        return <Archive className="w-3 h-3" />;
       default:
-        return <Cloud className="w-4 h-4" />;
+        return <Cloud className="w-3 h-3" />;
     }
   };
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+    <div>
       {/* Header */}
-      <div className="relative overflow-hidden border-b border-slate-700 p-4 bg-gradient-to-r from-blue-600/20 to-cyan-600/20">
-        <div className="absolute inset-0 opacity-10 blur-xl">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500 rounded-full"></div>
-        </div>
-        <div className="relative flex items-center gap-3">
-          <Cloud className="w-6 h-6 text-blue-400" />
-          <div>
-            <h2 className="font-bold text-base">Azure Infrastructure</h2>
-            <p className="text-xs text-slate-300">Design cloud deployment architecture</p>
-          </div>
-        </div>
-      </div>
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-aether-muted mb-2 flex items-center gap-1.5">
+        <Cloud size={14} className="text-blue-400" />
+        Azure Infrastructure
+      </h3>
+      <p className="text-[11px] text-aether-muted mb-4">
+        Design and configure cloud deployment architecture
+      </p>
 
       {/* Tabs */}
-      <div className="flex gap-0 border-b border-slate-700 bg-slate-800/50">
+      <div className="flex gap-2 mb-4">
         <button
           onClick={() => {
             setActiveTab('services');
             setSelectedService(null);
           }}
-          className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+          className={`flex-1 flex items-center justify-center capitalize px-2 py-1.5 rounded text-[10px] font-medium transition ${
             activeTab === 'services'
-              ? 'border-b-2 border-blue-500 text-blue-400'
-              : 'text-slate-400 hover:text-slate-300'
+              ? 'bg-aether-accent text-white'
+              : 'bg-aether-bg border border-aether-border text-aether-text hover:border-aether-accent/50'
           }`}
         >
           Services
         </button>
         <button
           onClick={() => setActiveTab('templates')}
-          className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+          className={`flex-1 flex items-center justify-center capitalize px-2 py-1.5 rounded text-[10px] font-medium transition ${
             activeTab === 'templates'
-              ? 'border-b-2 border-blue-500 text-blue-400'
-              : 'text-slate-400 hover:text-slate-300'
+              ? 'bg-aether-accent text-white'
+              : 'bg-aether-bg border border-aether-border text-aether-text hover:border-aether-accent/50'
           }`}
         >
           Templates
@@ -243,61 +239,51 @@ export default function AzureInfrastructurePanel({ onNodeCreated, onTemplateLoad
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="space-y-4">
         {/* Error State */}
         {error && (
-          <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium text-red-300">Error</p>
-                <p className="text-sm text-red-200/80 mt-1">{error}</p>
-              </div>
-            </div>
+          <div className="p-3 bg-aether-danger/10 border border-aether-danger/30 rounded-lg flex gap-2">
+            <AlertCircle className="w-4 h-4 text-aether-danger flex-shrink-0 mt-0.5" />
+            <div className="text-[11px] text-aether-danger/90">{error}</div>
           </div>
         )}
 
         {/* Success State */}
         {success && (
-          <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/30">
-            <div className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium text-green-300">Success</p>
-                <p className="text-sm text-green-200/80 mt-1">
-                  {activeTab === 'services' ? 'Node created successfully' : 'Template loaded successfully'}
-                </p>
-              </div>
+          <div className="p-3 bg-aether-success/10 border border-aether-success/30 rounded-lg flex gap-2">
+            <CheckCircle className="w-4 h-4 text-aether-success flex-shrink-0 mt-0.5" />
+            <div className="text-[11px] text-aether-success/90">
+              {activeTab === 'services' ? 'Node created successfully' : 'Template loaded successfully'}
             </div>
           </div>
         )}
 
         {/* Services Tab */}
         {activeTab === 'services' && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {!selectedService ? (
               <div className="space-y-2">
                 {loading && !services.length ? (
                   <div className="flex justify-center py-8">
-                    <Loader2 className="w-6 h-6 animate-spin text-blue-400" />
+                    <Loader2 className="w-5 h-5 animate-spin text-aether-accent" />
                   </div>
                 ) : (
                   <>
-                    <p className="text-sm font-medium text-slate-200">Available Services</p>
-                    <div className="grid gap-2">
+                    <p className="text-[10px] uppercase font-semibold text-aether-muted mb-2 tracking-wider">Available Services</p>
+                    <div className="space-y-2">
                       {services.map(service => (
                         <button
                           key={service.id}
                           onClick={() => handleServiceSelect(service)}
-                          className="p-3 rounded-lg bg-slate-700/50 hover:bg-slate-700 border border-slate-600 text-left transition-all"
+                          className="w-full p-3 rounded-lg bg-aether-bg border border-aether-border text-left hover:border-aether-accent/50 transition-all group"
                         >
                           <div className="flex items-start gap-3">
-                            <span className="text-2xl">{service.icon}</span>
+                            <span className="text-xl group-hover:scale-110 transition-transform">{service.icon}</span>
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-medium text-slate-100">{service.label}</h3>
-                              <p className="text-xs text-slate-400 mt-1">{service.description}</p>
+                              <h3 className="font-medium text-[11px] text-aether-text">{service.label}</h3>
+                              <p className="text-[10px] text-aether-muted mt-1 leading-relaxed line-clamp-2">{service.description}</p>
                               <div className="flex gap-2 mt-2">
-                                <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-slate-600/50 rounded text-slate-300">
+                                <span className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 bg-aether-bg/80 border border-aether-border rounded text-aether-muted">
                                   {getCategoryIcon(service.category)}
                                   {service.category}
                                 </span>
@@ -311,25 +297,25 @@ export default function AzureInfrastructurePanel({ onNodeCreated, onTemplateLoad
                 )}
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {/* Service Configuration */}
-                <div className="p-4 rounded-lg bg-slate-700/30 border border-slate-600">
-                  <h3 className="font-medium text-slate-100 mb-4">
-                    {selectedService.label} Configuration
+                <div className="p-3 rounded-lg bg-aether-bg border border-aether-border">
+                  <h3 className="font-medium text-xs text-aether-text mb-3">
+                    {selectedService.label} Config
                   </h3>
 
                   {serviceOptions && (
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       {/* Region Selection */}
                       {serviceOptions.options.regions && (
                         <div>
-                          <label className="block text-sm font-medium text-slate-200 mb-2">
+                          <label className="block text-[10px] font-semibold text-aether-muted mb-1.5 uppercase tracking-wider">
                             Region
                           </label>
                           <select
                             value={config.region || ''}
                             onChange={e => handleConfigChange('region', e.target.value)}
-                            className="w-full px-3 py-2 rounded-lg bg-slate-700 border border-slate-600 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full bg-aether-bg border border-aether-border rounded px-3 py-2 text-xs text-aether-text outline-none focus:border-aether-accent transition"
                           >
                             <option value="">Select Region</option>
                             {serviceOptions.options.regions.map(region => (
@@ -344,13 +330,13 @@ export default function AzureInfrastructurePanel({ onNodeCreated, onTemplateLoad
                       {/* Tier Selection */}
                       {serviceOptions.options.tiers && (
                         <div>
-                          <label className="block text-sm font-medium text-slate-200 mb-2">
+                          <label className="block text-[10px] font-semibold text-aether-muted mb-1.5 uppercase tracking-wider">
                             Service Tier
                           </label>
                           <select
                             value={config.tier || ''}
                             onChange={e => handleConfigChange('tier', e.target.value)}
-                            className="w-full px-3 py-2 rounded-lg bg-slate-700 border border-slate-600 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full bg-aether-bg border border-aether-border rounded px-3 py-2 text-xs text-aether-text outline-none focus:border-aether-accent transition"
                           >
                             <option value="">Select Tier</option>
                             {serviceOptions.options.tiers.map(tier => (
@@ -365,13 +351,13 @@ export default function AzureInfrastructurePanel({ onNodeCreated, onTemplateLoad
                       {/* Runtime Selection (App Service) */}
                       {serviceOptions.options.runtimes && (
                         <div>
-                          <label className="block text-sm font-medium text-slate-200 mb-2">
+                          <label className="block text-[10px] font-semibold text-aether-muted mb-1.5 uppercase tracking-wider">
                             Runtime
                           </label>
                           <select
                             value={config.runtime || ''}
                             onChange={e => handleConfigChange('runtime', e.target.value)}
-                            className="w-full px-3 py-2 rounded-lg bg-slate-700 border border-slate-600 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full bg-aether-bg border border-aether-border rounded px-3 py-2 text-xs text-aether-text outline-none focus:border-aether-accent transition"
                           >
                             <option value="">Select Runtime</option>
                             {serviceOptions.options.runtimes.map(runtime => (
@@ -386,13 +372,13 @@ export default function AzureInfrastructurePanel({ onNodeCreated, onTemplateLoad
                       {/* API Selection (Cosmos DB) */}
                       {serviceOptions.options.apis && (
                         <div>
-                          <label className="block text-sm font-medium text-slate-200 mb-2">
+                          <label className="block text-[10px] font-semibold text-aether-muted mb-1.5 uppercase tracking-wider">
                             API Type
                           </label>
                           <select
                             value={config.api || ''}
                             onChange={e => handleConfigChange('api', e.target.value)}
-                            className="w-full px-3 py-2 rounded-lg bg-slate-700 border border-slate-600 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full bg-aether-bg border border-aether-border rounded px-3 py-2 text-xs text-aether-text outline-none focus:border-aether-accent transition"
                           >
                             <option value="">Select API</option>
                             {serviceOptions.options.apis.map(api => (
@@ -407,7 +393,7 @@ export default function AzureInfrastructurePanel({ onNodeCreated, onTemplateLoad
                       {/* Throughput (Cosmos DB) */}
                       {selectedService.type.includes('CosmosDB') && (
                         <div>
-                          <label className="block text-sm font-medium text-slate-200 mb-2">
+                          <label className="block text-[10px] font-semibold text-aether-muted mb-1.5 uppercase tracking-wider">
                             Throughput (RU/s)
                           </label>
                           <input
@@ -417,16 +403,16 @@ export default function AzureInfrastructurePanel({ onNodeCreated, onTemplateLoad
                             step="100"
                             value={config.throughput || 400}
                             onChange={e => handleConfigChange('throughput', parseInt(e.target.value))}
-                            className="w-full px-3 py-2 rounded-lg bg-slate-700 border border-slate-600 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full bg-aether-bg border border-aether-border rounded px-3 py-2 text-xs text-aether-text outline-none focus:border-aether-accent transition font-mono"
                           />
-                          <p className="text-xs text-slate-400 mt-1">400 - 1,000,000 RU/s</p>
+                          <p className="text-[9px] text-aether-muted mt-1">400 - 1,000,000 RU/s</p>
                         </div>
                       )}
 
                       {/* Instances (App Service) */}
                       {selectedService.type.includes('AppService') && (
                         <div>
-                          <label className="block text-sm font-medium text-slate-200 mb-2">
+                          <label className="block text-[10px] font-semibold text-aether-muted mb-1.5 uppercase tracking-wider">
                             Instances
                           </label>
                           <input
@@ -435,7 +421,7 @@ export default function AzureInfrastructurePanel({ onNodeCreated, onTemplateLoad
                             max="100"
                             value={config.instances || 1}
                             onChange={e => handleConfigChange('instances', parseInt(e.target.value))}
-                            className="w-full px-3 py-2 rounded-lg bg-slate-700 border border-slate-600 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full bg-aether-bg border border-aether-border rounded px-3 py-2 text-xs text-aether-text outline-none focus:border-aether-accent transition font-mono"
                           />
                         </div>
                       )}
@@ -443,8 +429,8 @@ export default function AzureInfrastructurePanel({ onNodeCreated, onTemplateLoad
                       {/* Quota Tokens (OpenAI) */}
                       {selectedService.type.includes('OpenAI') && (
                         <div>
-                          <label className="block text-sm font-medium text-slate-200 mb-2">
-                            Token Quota (per minute)
+                          <label className="block text-[10px] font-semibold text-aether-muted mb-1.5 uppercase tracking-wider">
+                            Token Quota (per min)
                           </label>
                           <input
                             type="number"
@@ -452,7 +438,7 @@ export default function AzureInfrastructurePanel({ onNodeCreated, onTemplateLoad
                             step="1000"
                             value={config.quotaTokens || 240000}
                             onChange={e => handleConfigChange('quotaTokens', parseInt(e.target.value))}
-                            className="w-full px-3 py-2 rounded-lg bg-slate-700 border border-slate-600 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full bg-aether-bg border border-aether-border rounded px-3 py-2 text-xs text-aether-text outline-none focus:border-aether-accent transition font-mono"
                           />
                         </div>
                       )}
@@ -462,26 +448,24 @@ export default function AzureInfrastructurePanel({ onNodeCreated, onTemplateLoad
 
                 {/* Cost Estimate */}
                 {costEstimate && (
-                  <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
-                    <div className="flex items-start gap-3">
-                      <DollarSign className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-medium text-emerald-300">Cost Estimate</p>
-                        <p className="text-sm text-emerald-200/80 mt-1">
-                          ${costEstimate.estimate} {costEstimate.currency}
-                        </p>
-                      </div>
+                  <div className="p-3 rounded-lg bg-aether-success/10 border border-aether-success/30 flex gap-2">
+                    <DollarSign className="w-4 h-4 text-aether-success flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-[10px] uppercase font-bold text-aether-success/80">Est. Cost</p>
+                      <p className="text-sm font-semibold text-aether-success">
+                        ${costEstimate.estimate} {costEstimate.currency}
+                      </p>
                     </div>
                   </div>
                 )}
 
                 {/* Validation Errors */}
                 {validation && !validation.valid && (
-                  <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30">
-                    <p className="text-sm font-medium text-red-300 mb-2">Configuration Issues:</p>
-                    <ul className="text-xs text-red-200/80 space-y-1">
+                  <div className="p-3 rounded-lg bg-aether-danger/10 border border-aether-danger/30">
+                    <p className="text-[10px] font-semibold text-aether-danger mb-1 uppercase">Issues</p>
+                    <ul className="text-[10px] text-aether-danger/90 space-y-1">
                       {validation.errors.map((err, idx) => (
-                        <li key={idx}>• {err}</li>
+                        <li key={idx} className="leading-relaxed">• {err}</li>
                       ))}
                     </ul>
                   </div>
@@ -496,7 +480,7 @@ export default function AzureInfrastructurePanel({ onNodeCreated, onTemplateLoad
                       setValidation(null);
                       setCostEstimate(null);
                     }}
-                    className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 transition-colors text-sm"
+                    className="flex-[0.8] py-2 rounded bg-aether-bg border border-aether-border text-aether-muted text-[11px] font-medium hover:text-aether-text hover:border-aether-accent/50 transition-colors"
                   >
                     Back
                   </button>
@@ -504,37 +488,27 @@ export default function AzureInfrastructurePanel({ onNodeCreated, onTemplateLoad
                   <button
                     onClick={handleValidate}
                     disabled={loading}
-                    className="flex-1 px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 transition-colors text-sm disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="flex-1 py-2 flex items-center justify-center gap-1.5 rounded bg-aether-accent/20 text-aether-accent text-[11px] font-medium hover:bg-aether-accent/30 transition-colors disabled:opacity-50"
                   >
                     {loading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Validating...
-                      </>
+                      <Loader2 className="w-3 h-3 animate-spin" />
                     ) : (
-                      <>
-                        <Settings className="w-4 h-4" />
-                        Validate & Estimate
-                      </>
+                      <Settings className="w-3 h-3" />
                     )}
+                    Validate
                   </button>
 
                   <button
                     onClick={handleCreateNode}
                     disabled={loading || !validation?.valid}
-                    className="flex-1 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 disabled:opacity-50 text-white transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                    className="flex-[1.2] py-2 flex items-center justify-center gap-1.5 rounded bg-blue-600 hover:bg-blue-500 disabled:bg-aether-border disabled:text-aether-muted text-white text-[11px] font-medium transition-colors"
                   >
                     {loading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Creating...
-                      </>
+                      <Loader2 className="w-3 h-3 animate-spin" />
                     ) : (
-                      <>
-                        <Plus className="w-4 h-4" />
-                        Create Node
-                      </>
+                      <Plus className="w-3 h-3" />
                     )}
+                    Create
                   </button>
                 </div>
               </div>
@@ -550,18 +524,18 @@ export default function AzureInfrastructurePanel({ onNodeCreated, onTemplateLoad
                 key={template.id}
                 onClick={() => handleLoadTemplate(template.id)}
                 disabled={loading}
-                className="w-full p-4 rounded-lg bg-slate-700/50 hover:bg-slate-700 border border-slate-600 text-left transition-all disabled:opacity-50"
+                className="w-full p-3 rounded-lg bg-aether-bg hover:bg-aether-border/50 border border-aether-border text-left transition-all disabled:opacity-50 group"
               >
-                <div className="flex items-start gap-4">
-                  <span className="text-3xl">{template.icon}</span>
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl group-hover:scale-110 transition-transform">{template.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-slate-100">{template.name}</h3>
-                    <p className="text-sm text-slate-400 mt-1">{template.description}</p>
+                    <h3 className="font-medium text-[11px] text-aether-text">{template.name}</h3>
+                    <p className="text-[10px] text-aether-muted mt-1 leading-relaxed">{template.description}</p>
                   </div>
                   {loading ? (
-                    <Loader2 className="w-5 h-5 text-blue-400 animate-spin flex-shrink-0 mt-1" />
+                    <Loader2 className="w-4 h-4 text-aether-accent animate-spin flex-shrink-0 mt-1" />
                   ) : (
-                    <Plus className="w-5 h-5 text-slate-400 flex-shrink-0 mt-1" />
+                    <Plus className="w-4 h-4 text-aether-muted group-hover:text-aether-accent flex-shrink-0 mt-1 transition-colors" />
                   )}
                 </div>
               </button>
@@ -571,8 +545,9 @@ export default function AzureInfrastructurePanel({ onNodeCreated, onTemplateLoad
       </div>
 
       {/* Footer */}
-      <div className="border-t border-slate-700 p-3 bg-slate-900/50 text-xs text-slate-400">
-        <p>💡 Create nodes individually or load predefined templates for common architectures</p>
+      <div className="mt-4 pt-3 border-t border-aether-border flex gap-2 text-[10px] text-aether-muted">
+        <span className="text-[#3b82f6]">💡</span>
+        Create nodes individually or load predefined templates for common architectures.
       </div>
     </div>
   );

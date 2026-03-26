@@ -2,7 +2,7 @@
  * AetherOS — Repository Inference Panel
  */
 import React, { useState } from 'react';
-import { GitBranch, Loader2, Upload, FolderOpen } from 'lucide-react';
+import { GitBranch, Loader2, Upload, FolderOpen, CheckCircle } from 'lucide-react';
 import useStore from '../../store/useStore';
 import api from '../../lib/api';
 
@@ -75,6 +75,21 @@ export default function InferencePanel() {
             <><Upload size={14} /> Infer Architecture</>
           )}
         </button>
+
+        {/* Analysed button (connects to CBCT) */}
+        {!inferenceLoading && useStore.getState().lastInferredRepo && (
+          <button
+            onClick={() => {
+              const repo = useStore.getState().lastInferredRepo;
+              useStore.getState().setSidebarTab('cbct');
+              // This will be picked up by the CbctPanel
+              setNotification(`Switching to CBCT to analyze ${repo}`);
+            }}
+            className="w-full mt-2 flex items-center justify-center gap-2 px-3 py-2 rounded bg-green-600/20 text-green-400 border border-green-600/30 text-xs font-medium hover:bg-green-600/30 transition shadow-lg shadow-green-900/10 animate-in fade-in zoom-in duration-300"
+          >
+            <CheckCircle size={14} /> Analysed — Open CBCT
+          </button>
+        )}
       </div>
 
       <div className="flex items-center gap-3 mb-4">

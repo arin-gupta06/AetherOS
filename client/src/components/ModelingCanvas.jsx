@@ -49,6 +49,13 @@ function CanvasInner() {
     selectedEdgeRef.current = null;
     setSelectedEdge(null);
     setSelectedNode(node.id);
+    
+    // Connect to CBCT: If a node is clicked, we might want to highlight its specific structure
+    // Automatically switch to CBCT tab if available
+    const currentTab = useStore.getState().sidebarTab;
+    if (currentTab !== 'cbct') {
+      // Just set the selected node, the CBCT panel can listen to it
+    }
   }, [setSelectedNode, setSelectedEdge]);
 
   const onEdgeClick = useCallback((_event, edge) => {

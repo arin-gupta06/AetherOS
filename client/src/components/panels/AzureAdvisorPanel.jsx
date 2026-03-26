@@ -1,10 +1,10 @@
 /**
- * Azure Architecture Advisor Panel
- * UI component for Azure OpenAI analysis and recommendations
+ * AI Advisor Panel
+ * UI component for Azure OpenAI analysis and recommendations styled for AetherOS
  */
 
 import React, { useState } from 'react';
-import { Zap, Brain, AlertCircle } from 'lucide-react';
+import { Zap, Brain, AlertCircle, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 import {
   analyzeArchitectureWithAzure,
   getAzureDeploymentSuggestion,
@@ -65,89 +65,69 @@ export default function AzureAdvisorPanel() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div>
       {/* Header */}
-      <div className="px-4 py-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-        <div className="flex items-center gap-2 mb-2">
-          <Brain className="w-5 h-5 text-blue-600" />
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-            Azure Architecture Advisor
-          </h2>
-        </div>
-        <p className="text-sm text-slate-600 dark:text-slate-400">
-          AI-powered recommendations powered by Azure OpenAI
-        </p>
-      </div>
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-aether-muted mb-2 flex items-center gap-1.5">
+        <Brain size={14} className="text-aether-accent" />
+        AI Advisor
+      </h3>
+      <p className="text-[11px] text-aether-muted mb-4">
+        AI-powered recommendations and analysis for your architecture
+      </p>
 
       {/* Tabs */}
-      <div className="flex gap-2 px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-        <button
-          onClick={() => setActiveTab('analysis')}
-          className={`px-3 py-1 text-sm font-medium rounded transition-colors ${
-            activeTab === 'analysis'
-              ? 'bg-blue-600 text-white'
-              : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300'
-          }`}
-        >
-          Analysis
-        </button>
-        <button
-          onClick={() => setActiveTab('deployment')}
-          className={`px-3 py-1 text-sm font-medium rounded transition-colors ${
-            activeTab === 'deployment'
-              ? 'bg-blue-600 text-white'
-              : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300'
-          }`}
-        >
-          Deployment
-        </button>
-        <button
-          onClick={() => setActiveTab('scalability')}
-          className={`px-3 py-1 text-sm font-medium rounded transition-colors ${
-            activeTab === 'scalability'
-              ? 'bg-blue-600 text-white'
-              : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300'
-          }`}
-        >
-          Scalability
-        </button>
+      <div className="flex gap-2 mb-4">
+        {['analysis', 'deployment', 'scalability'].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`flex-1 flex items-center justify-center capitalize px-2 py-1.5 rounded text-[10px] font-medium transition ${
+              activeTab === tab
+                ? 'bg-aether-accent text-white'
+                : 'bg-aether-bg border border-aether-border text-aether-text hover:border-aether-accent/50'
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="space-y-4">
         {error && (
-          <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex gap-2">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-red-700 dark:text-red-400">{error}</div>
+          <div className="p-3 bg-aether-danger/10 border border-aether-danger/30 rounded-lg flex gap-2">
+            <AlertCircle className="w-4 h-4 text-aether-danger flex-shrink-0 mt-0.5" />
+            <div className="text-[11px] text-aether-danger/90">{error}</div>
           </div>
         )}
 
         {/* Analysis Tab */}
         {activeTab === 'analysis' && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <button
               onClick={handleAnalyzeArchitecture}
-              disabled={loading}
-              className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+              disabled={loading || nodes.length === 0}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded bg-blue-600 text-white text-xs font-medium hover:bg-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Zap className="w-4 h-4" />
-              {loading ? 'Analyzing...' : 'Analyze Architecture'}
+              {loading ? (
+                <><Loader2 size={14} className="animate-spin" /> Analyzing...</>
+              ) : (
+                <><Zap size={14} /> Analyze Architecture</>
+              )}
             </button>
 
             {analysis && (
-              <div className="space-y-3">
+              <div className="space-y-3 mt-3">
                 {analysis.analysis?.recommendations && (
-                  <div className="bg-white dark:bg-slate-700 p-3 rounded-lg border border-slate-200 dark:border-slate-600">
-                    <h3 className="font-semibold text-slate-900 dark:text-white mb-2">
-                      Recommendations
-                    </h3>
-                    <ul className="space-y-1 text-sm text-slate-700 dark:text-slate-300">
+                  <div className="p-3 bg-aether-bg border border-aether-border rounded-lg">
+                    <h4 className="text-[10px] uppercase tracking-wider text-aether-muted mb-2">Recommendations</h4>
+                    <ul className="space-y-2 text-[11px] text-aether-text">
                       {(Array.isArray(analysis.analysis.recommendations)
                         ? analysis.analysis.recommendations
                         : []
                       ).map((rec, i) => (
-                        <li key={i} className="flex gap-2">
-                          <span className="text-blue-600">•</span>
+                        <li key={i} className="flex gap-2 leading-relaxed">
+                          <span className="text-blue-400 mt-0.5">•</span>
                           <span>{rec}</span>
                         </li>
                       ))}
@@ -156,15 +136,13 @@ export default function AzureAdvisorPanel() {
                 )}
 
                 {analysis.analysis?.risks && (
-                  <div className="bg-white dark:bg-slate-700 p-3 rounded-lg border border-slate-200 dark:border-slate-600">
-                    <h3 className="font-semibold text-slate-900 dark:text-white mb-2">
-                      Identified Risks
-                    </h3>
-                    <ul className="space-y-1 text-sm text-slate-700 dark:text-slate-300">
+                  <div className="p-3 bg-aether-bg border border-aether-border rounded-lg">
+                    <h4 className="text-[10px] uppercase tracking-wider text-aether-muted mb-2">Identified Risks</h4>
+                    <ul className="space-y-2 text-[11px] text-aether-text">
                       {(Array.isArray(analysis.analysis.risks) ? analysis.analysis.risks : []).map(
                         (risk, i) => (
-                          <li key={i} className="flex gap-2">
-                            <span className="text-amber-600">⚠</span>
+                          <li key={i} className="flex gap-2 leading-relaxed">
+                            <AlertTriangle size={12} className="text-aether-warning mt-0.5 flex-shrink-0" />
                             <span>{risk}</span>
                           </li>
                         )
@@ -174,9 +152,9 @@ export default function AzureAdvisorPanel() {
                 )}
 
                 {analysis.analysis?.analysis && (
-                  <div className="bg-white dark:bg-slate-700 p-3 rounded-lg border border-slate-200 dark:border-slate-600">
-                    <h3 className="font-semibold text-slate-900 dark:text-white mb-2">Analysis</h3>
-                    <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
+                  <div className="p-3 bg-aether-bg border border-aether-border rounded-lg">
+                    <h4 className="text-[10px] uppercase tracking-wider text-aether-muted mb-2">Detailed Analysis</h4>
+                    <p className="text-[11px] text-aether-text whitespace-pre-wrap leading-relaxed">
                       {analysis.analysis.analysis}
                     </p>
                   </div>
@@ -188,27 +166,28 @@ export default function AzureAdvisorPanel() {
 
         {/* Deployment Tab */}
         {activeTab === 'deployment' && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <button
               onClick={handleDeploymentSuggestion}
-              disabled={loading}
-              className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-slate-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+              disabled={loading || nodes.length === 0}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded bg-green-600 text-white text-xs font-medium hover:bg-green-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Zap className="w-4 h-4" />
-              {loading ? 'Generating...' : 'Get Deployment Architecture'}
+              {loading ? (
+                <><Loader2 size={14} className="animate-spin" /> Generating...</>
+              ) : (
+                <><Zap size={14} /> Get Deployment Architecture</>
+              )}
             </button>
 
             {deploymentSuggestion && (
-              <div className="space-y-3">
+              <div className="space-y-3 mt-3">
                 {deploymentSuggestion.deploymentArchitecture?.services && (
-                  <div className="bg-white dark:bg-slate-700 p-3 rounded-lg border border-slate-200 dark:border-slate-600">
-                    <h3 className="font-semibold text-slate-900 dark:text-white mb-2">
-                      Recommended Services
-                    </h3>
-                    <ul className="space-y-1 text-sm text-slate-700 dark:text-slate-300">
+                  <div className="p-3 bg-aether-bg border border-aether-border rounded-lg">
+                    <h4 className="text-[10px] uppercase tracking-wider text-aether-muted mb-2">Recommended Services</h4>
+                    <ul className="space-y-2 text-[11px] text-aether-text">
                       {deploymentSuggestion.deploymentArchitecture.services.map((svc, i) => (
-                        <li key={i} className="flex gap-2">
-                          <span className="text-green-600">✓</span>
+                        <li key={i} className="flex gap-2 leading-relaxed">
+                          <CheckCircle size={12} className="text-aether-success mt-0.5 flex-shrink-0" />
                           <span>{svc}</span>
                         </li>
                       ))}
@@ -217,20 +196,18 @@ export default function AzureAdvisorPanel() {
                 )}
 
                 {deploymentSuggestion.deploymentArchitecture?.rationale && (
-                  <div className="bg-white dark:bg-slate-700 p-3 rounded-lg border border-slate-200 dark:border-slate-600">
-                    <h3 className="font-semibold text-slate-900 dark:text-white mb-2">Rationale</h3>
-                    <p className="text-sm text-slate-700 dark:text-slate-300">
+                  <div className="p-3 bg-aether-bg border border-aether-border rounded-lg">
+                    <h4 className="text-[10px] uppercase tracking-wider text-aether-muted mb-2">Rationale</h4>
+                    <p className="text-[11px] text-aether-text leading-relaxed">
                       {deploymentSuggestion.deploymentArchitecture.rationale}
                     </p>
                   </div>
                 )}
 
                 {deploymentSuggestion.deploymentArchitecture?.estimatedCost && (
-                  <div className="bg-white dark:bg-slate-700 p-3 rounded-lg border border-slate-200 dark:border-slate-600">
-                    <h3 className="font-semibold text-slate-900 dark:text-white mb-2">
-                      Estimated Cost
-                    </h3>
-                    <p className="text-sm text-green-700 dark:text-green-400 font-medium">
+                  <div className="p-3 bg-aether-success/10 border border-aether-success/30 rounded-lg">
+                    <h4 className="text-[10px] uppercase tracking-wider text-aether-success/80 mb-1">Estimated Cost</h4>
+                    <p className="text-sm font-bold text-aether-success">
                       {deploymentSuggestion.deploymentArchitecture.estimatedCost}
                     </p>
                   </div>
@@ -242,31 +219,32 @@ export default function AzureAdvisorPanel() {
 
         {/* Scalability Tab */}
         {activeTab === 'scalability' && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <button
               onClick={handleScalabilityAnalysis}
-              disabled={loading}
-              className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+              disabled={loading || nodes.length === 0}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded bg-aether-accent text-white text-xs font-medium hover:bg-aether-accent-light transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Zap className="w-4 h-4" />
-              {loading ? 'Analyzing...' : 'Analyze Scalability'}
+              {loading ? (
+                <><Loader2 size={14} className="animate-spin" /> Analyzing...</>
+              ) : (
+                <><Zap size={14} /> Analyze Scalability</>
+              )}
             </button>
 
             {scalabilityAnalysis && (
-              <div className="space-y-3">
+              <div className="space-y-3 mt-3">
                 {scalabilityAnalysis.scalabilityAnalysis?.bottlenecks && (
-                  <div className="bg-white dark:bg-slate-700 p-3 rounded-lg border border-red-200 dark:border-red-800">
-                    <h3 className="font-semibold text-slate-900 dark:text-white mb-2 text-red-700 dark:text-red-400">
-                      Bottlenecks
-                    </h3>
-                    <ul className="space-y-1 text-sm text-slate-700 dark:text-slate-300">
+                  <div className="p-3 bg-aether-bg border border-aether-danger/50 rounded-lg">
+                    <h4 className="text-[10px] uppercase tracking-wider text-aether-danger mb-2">Bottlenecks</h4>
+                    <ul className="space-y-2 text-[11px] text-aether-text">
                       {(
                         Array.isArray(scalabilityAnalysis.scalabilityAnalysis.bottlenecks)
                           ? scalabilityAnalysis.scalabilityAnalysis.bottlenecks
                           : []
                       ).map((bottleneck, i) => (
-                        <li key={i} className="flex gap-2">
-                          <span className="text-red-600">⚠</span>
+                        <li key={i} className="flex gap-2 leading-relaxed">
+                          <AlertTriangle size={12} className="text-aether-danger mt-0.5 flex-shrink-0" />
                           <span>{bottleneck}</span>
                         </li>
                       ))}
@@ -275,18 +253,16 @@ export default function AzureAdvisorPanel() {
                 )}
 
                 {scalabilityAnalysis.scalabilityAnalysis?.solutions && (
-                  <div className="bg-white dark:bg-slate-700 p-3 rounded-lg border border-slate-200 dark:border-slate-600">
-                    <h3 className="font-semibold text-slate-900 dark:text-white mb-2">
-                      Solutions
-                    </h3>
-                    <ul className="space-y-1 text-sm text-slate-700 dark:text-slate-300">
+                  <div className="p-3 bg-aether-bg border border-aether-border rounded-lg">
+                    <h4 className="text-[10px] uppercase tracking-wider text-aether-muted mb-2">Solutions</h4>
+                    <ul className="space-y-2 text-[11px] text-aether-text">
                       {(
                         Array.isArray(scalabilityAnalysis.scalabilityAnalysis.solutions)
                           ? scalabilityAnalysis.scalabilityAnalysis.solutions
                           : []
                       ).map((sol, i) => (
-                        <li key={i} className="flex gap-2">
-                          <span className="text-green-600">✓</span>
+                        <li key={i} className="flex gap-2 leading-relaxed">
+                          <CheckCircle size={12} className="text-aether-success mt-0.5 flex-shrink-0" />
                           <span>{sol}</span>
                         </li>
                       ))}

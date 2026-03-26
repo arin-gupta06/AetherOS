@@ -42,6 +42,7 @@ const useStore = create(
   rightPanelOpen: false,
   rightPanelTab: 'properties',
   inferenceLoading: false,
+  lastInferredRepo: null,
   notification: null,
 
   // ========== MUTATIONS (all go through state authority) ==========
@@ -259,7 +260,7 @@ const useStore = create(
       style: { stroke: '#6366f1' }
     }));
 
-    set({ nodes: newNodes, edges: newEdges });
+    set({ nodes: newNodes, edges: newEdges, lastInferredRepo: result.repoPath || result.path || null });
     get()._pushEvent('architecture-inferred', {
       nodeCount: newNodes.length,
       edgeCount: newEdges.length
@@ -339,6 +340,10 @@ const useStore = create(
   // --- CBCT ---
   setCbctData(data) {
     set({ cbctData: data });
+  },
+
+  setLastInferredRepo(repo) {
+    set({ lastInferredRepo: repo });
   },
 
   // --- UI ---

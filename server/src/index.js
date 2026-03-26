@@ -99,9 +99,9 @@ async function start() {
     console.warn('[DB] Reason:', err.message);
   }
 
-  server.listen(PORT, () => {
-    console.log(`[AetherOS] Server running on http://localhost:${PORT}`);
-    console.log(`[AetherOS] WebSocket on ws://localhost:${PORT}/ws`);
+  server.listen(PORT, '127.0.0.1', () => {
+    console.log(`[AetherOS] Server running on http://127.0.0.1:${PORT}`);
+    console.log(`[AetherOS] WebSocket on ws://127.0.0.1:${PORT}/ws`);
   });
 }
 
@@ -122,6 +122,16 @@ function shutdown() {
 
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[Unhandled Rejection] at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('[Uncaught Exception]', err.stack || err.message);
+  // Optional: Graceful shutdown on fatal errors
+  // shutdown();
+});
 
 start();
 

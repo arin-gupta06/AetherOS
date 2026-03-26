@@ -12,8 +12,13 @@ export default function CbctPanel() {
   const [tab, setTab] = useState('tree');
 
   const cbctData = useStore(s => s.cbctData);
+  const lastInferredRepo = useStore(s => s.lastInferredRepo);
+  const selectedNodeId = useStore(s => s.selectedNodeId);
+  const nodes = useStore(s => s.nodes);
   const setCbctData = useStore(s => s.setCbctData);
   const setNotification = useStore(s => s.setNotification);
+
+  const selectedNode = nodes.find(n => n.id === selectedNodeId);
 
   const handleAnalyze = async () => {
     if (!repoPath.trim()) return setNotification('Enter a repository path');
@@ -33,6 +38,20 @@ export default function CbctPanel() {
     }
   };
 
+  // Auto-analyze if we just came from inference
+  React.useEffect(() => {
+    if (lastInferredRepo && lastInferredRepo !== repoPath) {
+      setRepoPath(lastInferredRepo);
+    }
+  }, [lastInferredRepo]);
+
+  // Trigger analysis when repoPath is set via effect
+  React.useEffect(() => {
+    if (repoPath && !cbctData && !loading) {
+      handleAnalyze();
+    }
+  }, [repoPath, cbctData, loading]);
+
   const handleSelfAnalyze = async () => {
     setLoading(true);
     try {
@@ -49,11 +68,21 @@ export default function CbctPanel() {
   const renderTree = (node, depth = 0) => {
     if (!node) return null;
     const isDir = node.type === 'directory';
+    
+    // Highlight logic: if this node or its ancestor matches the selected node's label
+    const isHighlighted = selectedNode && (
+      node.name.toLowerCase().includes(selectedNode.data?.label?.toLowerCase()) ||
+      (selectedNode.data?.label === 'main-app' && depth === 0)
+    );
+
     return (
       <div key={node.name} style={{ paddingLeft: depth * 12 }}>
-        <div className={`flex items-center gap-1 py-0.5 text-[11px] ${isDir ? 'text-aether-accent' : 'text-aether-muted'}`}>
+        <div className={`flex items-center gap-1 py-0.5 text-[11px] transition-colors ${
+          isHighlighted ? 'text-white bg-aether-accent/10 rounded-sm' : isDir ? 'text-aether-accent' : 'text-aether-muted'
+        }`}>
           {isDir ? <FolderTree size={10} /> : <FileCode size={10} />}
-          <span>{node.name}</span>
+          <span className={isHighlighted ? 'font-bold' : ''}>{node.name}</span>
+          {isHighlighted && depth === 1 && <span className="text-[9px] bg-aether-accent text-white px-1 rounded ml-1">Service Root</span>}
         </div>
         {isDir && node.children?.map(child => renderTree(child, depth + 1))}
       </div>

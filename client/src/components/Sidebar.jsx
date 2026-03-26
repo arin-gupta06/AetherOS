@@ -3,8 +3,7 @@
  */
 import React from 'react';
 import {
-  Layers, GitBranch, Shield, Zap, Search, ScrollText,
-  Sparkles, Download, Bot, GitFork, LayoutGrid, Server, Github
+  Layers, GitBranch, Shield, Zap, Search, ScrollText, Download, Bot, Server
 } from 'lucide-react';
 import useStore from '../store/useStore';
 import NodePalette from './panels/NodePalette';
@@ -13,27 +12,19 @@ import RulesPanel from './panels/RulesPanel';
 import SimulationPanel from './panels/SimulationPanel';
 import CbctPanel from './panels/CbctPanel';
 import EventLogPanel from './panels/EventLogPanel';
-import AiArchitectureAdvisorPanel from './panels/AiArchitectureAdvisorPanel';
 import ArchitectureExportPanel from './panels/ArchitectureExportPanel';
 import AzureAdvisorPanel from './panels/AzureAdvisorPanel';
-import GitHubAnalyzerPanel from './panels/GitHubAnalyzerPanel';
-import AzureReferenceArchitecturesPanel from './panels/AzureReferenceArchitecturesPanel';
 import AzureInfrastructurePanel from './panels/AzureInfrastructurePanel';
-import GitHubImportPanel from './panels/GitHubImportPanel';
 
 const tabs = [
   { id: 'nodes',           icon: Layers,      label: 'Nodes' },
   { id: 'inference',       icon: GitBranch,   label: 'Infer' },
-  { id: 'github-import',   icon: Github,      label: 'GitHub Import' },
-  { id: 'github-analyzer', icon: GitFork,     label: 'GitHub Analyzer' },
   { id: 'rules',           icon: Shield,      label: 'Rules' },
   { id: 'simulation',      icon: Zap,         label: 'Simulate' },
   { id: 'cbct',            icon: Search,      label: 'CBCT' },
   { id: 'events',          icon: ScrollText,  label: 'Events' },
-  { id: 'ai-advisor',      icon: Sparkles,    label: 'AI Advisor' },
-  { id: 'azure-advisor',   icon: Bot,         label: 'Azure Advisor' },
+  { id: 'azure-advisor',   icon: Bot,         label: 'AI Advisor' },
   { id: 'azure-infra',     icon: Server,      label: 'Azure Infrastructure' },
-  { id: 'azure-templates', icon: LayoutGrid,  label: 'Azure Templates' },
   { id: 'export',          icon: Download,    label: 'Export' },
 ];
 
@@ -43,12 +34,6 @@ export default function Sidebar() {
   const violations = useStore(s => s.violations);
   const addNodes = useStore(s => s.addNodes);
   const addEdges = useStore(s => s.addEdges);
-
-  /** Callback wired to GitHubImportPanel — adds detected nodes+edges to canvas */
-  const handleArchitectureDetected = (architecture) => {
-    if (architecture?.nodes?.length) addNodes(architecture.nodes);
-    if (architecture?.edges?.length) addEdges(architecture.edges);
-  };
 
   /** Callback wired to AzureInfrastructurePanel — adds a single created node */
   const handleAzureNodeCreated = (node) => {
@@ -61,12 +46,6 @@ export default function Sidebar() {
     if (template?.edges?.length) addEdges(template.edges);
   };
 
-  /** Callback wired to AzureReferenceArchitecturesPanel — imports architecture to canvas */
-  const handleReferenceArchitectureImport = (nodes, edges) => {
-    if (nodes?.length) addNodes(nodes);
-    if (edges?.length) addEdges(edges);
-  };
-
   return (
     <div className="flex h-full shrink-0 mt-3 ml-2 mb-2 bg-transparent gap-2 pointer-events-none">
       {/* Icon rail */}
@@ -74,7 +53,7 @@ export default function Sidebar() {
         {tabs.map(tab => (
           <button
             key={tab.id}
-            onClick={() => setSidebarTab(tab.id)}
+            onClick={() => setSidebarTab(sidebarTab === tab.id ? null : tab.id)}
             className={`relative w-10 h-10 flex items-center justify-center rounded-full transition icon-container shrink-0 ${
               sidebarTab === tab.id
                 ? 'bg-aether-accent/20 text-aether-accent border-aether-accent/50'
@@ -93,34 +72,26 @@ export default function Sidebar() {
       </div>
 
       {/* Panel content */}
-      <div className="w-80 glass-panel border border-aether-border overflow-y-auto pointer-events-auto shadow-2xl mr-2">
-        <div className="p-4">
-          {sidebarTab === 'nodes'           && <NodePalette />}
-          {sidebarTab === 'inference'       && <InferencePanel />}
-          {sidebarTab === 'github-import'   && (
-            <GitHubImportPanel onArchitectureDetected={handleArchitectureDetected} />
-          )}
-          {sidebarTab === 'github-analyzer' && <GitHubAnalyzerPanel />}
-          {sidebarTab === 'rules'           && <RulesPanel />}
-          {sidebarTab === 'simulation'      && <SimulationPanel />}
-          {sidebarTab === 'cbct'            && <CbctPanel />}
-          {sidebarTab === 'events'          && <EventLogPanel />}
-          {sidebarTab === 'ai-advisor'      && <AiArchitectureAdvisorPanel />}
-          {sidebarTab === 'azure-advisor'   && <AzureAdvisorPanel />}
-          {sidebarTab === 'azure-infra'     && (
-            <AzureInfrastructurePanel
-              onNodeCreated={handleAzureNodeCreated}
-              onTemplateLoaded={handleAzureTemplateLoaded}
-            />
-          )}
-          {sidebarTab === 'azure-templates' && (
-            <AzureReferenceArchitecturesPanel
-              onImportArchitecture={handleReferenceArchitectureImport}
-            />
-          )}
-          {sidebarTab === 'export'          && <ArchitectureExportPanel />}
+      {sidebarTab && (
+        <div className="w-80 glass-panel border border-aether-border overflow-y-auto pointer-events-auto shadow-2xl mr-2">
+          <div className="p-4">
+            {sidebarTab === 'nodes'           && <NodePalette />}
+            {sidebarTab === 'inference'       && <InferencePanel />}
+            {sidebarTab === 'rules'           && <RulesPanel />}
+            {sidebarTab === 'simulation'      && <SimulationPanel />}
+            {sidebarTab === 'cbct'            && <CbctPanel />}
+            {sidebarTab === 'events'          && <EventLogPanel />}
+            {sidebarTab === 'azure-advisor'   && <AzureAdvisorPanel />}
+            {sidebarTab === 'azure-infra'     && (
+              <AzureInfrastructurePanel
+                onNodeCreated={handleAzureNodeCreated}
+                onTemplateLoaded={handleAzureTemplateLoaded}
+              />
+            )}
+            {sidebarTab === 'export'          && <ArchitectureExportPanel />}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
