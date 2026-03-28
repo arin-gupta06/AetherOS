@@ -13,6 +13,8 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import useStore from '../store/useStore';
 import ArchitectureNode from './nodes/ArchitectureNode';
+import { openCBCTContext, canInspectInCBCT } from '../integrations/cbctAdapter';
+import { queuePrefetch } from '../services/cbctPrefetch';
 
 const nodeTypes = {
   service: ArchitectureNode,
@@ -52,10 +54,35 @@ function CanvasInner() {
   }, [setSelectedNode, setSelectedEdge]);
 
   const onNodeDoubleClick = useCallback((_event, node) => {
-    // Transition to CODE view with the selected node
-    // This will trigger CBCT analysis and display code view
-    const enterCodeView = useStore.getState().enterCodeView;
-    enterCodeView(node.id);
+    // ADAPTER PATTERN: Use CBCT Adapter to build URL
+    // The adapter abstracts all CBCT integration details
+    try {
+      const lastInferredRepo = useStore.getState().lastInferredRepo;
+      
+      // Check if node can be inspected via adapter
+      if (!canInspectInCBCT(node, lastInferredRepo)) {
+        console.warn('[ModelingCanvas] Cannot inspect node in CBCT: no repository path');
+        return;
+      }
+
+      // Build CBCT URL using adapter
+      const cbctUrl = openCBCTContext(node, lastInferredRepo);
+      
+      // Transition to CODE view with adapter-generated URL
+      const store = useStore.getState();
+      store.enterCodeView(node.id);
+      store.setCbctUrl(cbctUrl);
+      
+      // Optionally prefetch next nodes for performance
+      if (lastInferredRepo) {
+        queuePrefetch(lastInferredRepo);
+      }
+    } catch (err) {
+      console.error('[ModelingCanvas] Error entering CODE view:', err.message);
+      useStore.getState().setNotification(
+        'Cannot open code view: ' + err.message
+      );
+    }
   }, []);
 
   const onEdgeClick = useCallback((_event, edge) => {

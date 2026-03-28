@@ -8,7 +8,7 @@ import Sidebar from './components/Sidebar';
 import ModelingCanvas from './components/ModelingCanvas';
 import RightPanel from './components/RightPanel';
 import Notification from './components/Notification';
-import CBCTWrapper from './components/CBCTWrapper';
+import CBCTViewer from './components/CBCTViewer';
 import useWebSocket from './hooks/useWebSocket';
 import useStore from './store/useStore';
 import api from './lib/api';
@@ -130,8 +130,9 @@ export default function App() {
   const currentEnvironment = useStore(s => s.currentEnvironment);
   const viewMode = useStore(s => s.viewMode);
   const selectedNodeId = useStore(s => s.selectedNodeId);
-  const lastInferredRepo = useStore(s => s.lastInferredRepo);
+  const cbctUrl = useStore(s => s.cbctUrl);
   const nodes = useStore(s => s.nodes);
+  const exitCodeView = useStore(s => s.exitCodeView);
   const loadEnvironments = useStore(s => s.loadEnvironments);
   const setNotification = useStore(s => s.setNotification);
 
@@ -150,6 +151,10 @@ export default function App() {
     return <WelcomeScreen />;
   }
 
+  // Get current node label for CODE view
+  const currentNode = nodes.find(n => n.id === selectedNodeId);
+  const nodeLabel = currentNode?.data?.label || 'Code View';
+
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-aether-bg">
       <Header />
@@ -166,12 +171,13 @@ export default function App() {
             <ModelingCanvas />
           </div>
 
-          {/* CODE View - CBCT Embedded */}
+          {/* CODE View - CBCT Embedded via Adapter Pattern */}
           {viewMode === 'CODE' && (
             <div className="absolute inset-0 z-[100] animate-in fade-in zoom-in-95 duration-500 overflow-hidden">
-              <CBCTWrapper 
-                nodeId={selectedNodeId} 
-                repoPath={nodes.find(n => n.id === selectedNodeId)?.data?.metadata?.repoPath || lastInferredRepo || ''} 
+              <CBCTViewer 
+                url={cbctUrl}
+                nodeLabel={nodeLabel}
+                onBack={exitCodeView}
               />
             </div>
           )}
