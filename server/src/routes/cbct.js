@@ -4,7 +4,7 @@
  */
 const express = require('express');
 const router = express.Router();
-const analysisService = require('../../../CodeBase-CartoGraphic-Tool-CBCT-/server/src/services/analysisService');
+const analysisService = require('../services/analysisService');
 
 router.post('/analyze', async (req, res) => {
   try {

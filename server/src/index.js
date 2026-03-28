@@ -3,6 +3,7 @@ const cors = require('cors');
 const http = require('http');
 const { WebSocketServer } = require('ws');
 const mongoose = require('mongoose');
+const { initializeRedis, closeRedis } = require('./services/redisService');
 
 console.log('[AetherOS] Initializing...');
 
@@ -17,11 +18,6 @@ const azureInfrastructureRoutes = require('./routes/azure-infrastructure');
 const githubRoutes = require('./routes/github');
 const aiRoutes = require('./routes/ai');
 const architectureRoutes = require('./routes/architecture');
-
-// Mount CBCT native backend routes
-const cbctAnalysisRoutes = require('../../CodeBase-CartoGraphic-Tool-CBCT-/server/src/routes/analysis');
-const cbctGraphRoutes = require('../../CodeBase-CartoGraphic-Tool-CBCT-/server/src/routes/graph');
-const cbctRepositoryRoutes = require('../../CodeBase-CartoGraphic-Tool-CBCT-/server/src/routes/repository');
 
 console.log('[AetherOS] All routes imported successfully');
 
@@ -65,11 +61,6 @@ app.use('/api/github', githubRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/architecture', architectureRoutes);
 
-// CBCT Native Routes
-app.use('/api/analysis', cbctAnalysisRoutes);
-app.use('/api/graph', cbctGraphRoutes);
-app.use('/api/repository', cbctRepositoryRoutes);
-
 // Health check
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', platform: 'AetherOS', version: '1.0.0' });
@@ -91,6 +82,17 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/aetheros';
 
 async function start() {
   console.log('[AetherOS] Starting server...');
+  
+  // Initialize Redis cache
+  console.log('[Cache] Initializing Redis...');
+  try {
+    await initializeRedis({
+      url: process.env.REDIS_URL || 'redis://127.0.0.1:6379'
+    });
+  } catch (err) {
+    console.warn('[Cache] Redis initialization failed:', err.message);
+    console.warn('[Cache] Running with local cache fallback');
+  }
   
   // Try MongoDB connection with a timeout
   console.log('[DB] Attempting to connect to MongoDB...');
@@ -116,8 +118,12 @@ async function start() {
 }
 
 // Graceful shutdown
-function shutdown() {
+async function shutdown() {
   console.log('\n[AetherOS] Shutting down...');
+  
+  // Close Redis connection
+  await closeRedis();
+  
   wss.close(() => {
     server.close(() => {
       mongoose.connection.close(false).then(() => {
