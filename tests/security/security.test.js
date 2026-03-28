@@ -70,7 +70,7 @@ describe('Security Tests - Input Validation & XSS Prevention', () => {
       
       expect(validateRepoUrl('https://github.com/test/repo')).toBe(true);
       expect(validateRepoUrl('javascript:alert("xss")')).toBe(false);
-      expect(validateRepoUrl(''; DROP TABLE users; --')).toBe(false);
+      expect(validateRepoUrl("'; DROP TABLE users; --")).toBe(false);
     });
   });
 
