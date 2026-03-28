@@ -12,10 +12,33 @@
     "dev:server": "npm run dev --workspace=server",
     "dev:client": "npm run dev --workspace=client",
     "build": "npm run build --workspace=client",
-    "start": "npm run start --workspace=server"
+    "start": "npm run start --workspace=server",
+    "test": "npm run test:full",
+    "test:full": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "test:unit": "vitest run tests/unit/**/*.test.js",
+    "test:integration": "vitest run tests/integration/**/*.test.js",
+    "test:e2e": "playwright test",
+    "test:e2e:debug": "playwright test --debug",
+    "test:performance": "vitest run tests/performance/**/*.test.js",
+    "test:performance:compare": "node scripts/compare-benchmarks.js",
+    "test:security": "vitest run tests/security/**/*.test.js",
+    "test:stability": "vitest run tests/stability/**/*.test.js",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage",
+    "test:bundlesize": "node scripts/check-bundle-size.js",
+    "lint": "eslint . --ext .js,.jsx",
+    "lint:fix": "eslint . --ext .js,.jsx --fix",
+    "format": "prettier --write \"**/*.{js,jsx,json,md}\""
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "@playwright/test": "^1.40.0",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/user-event": "^14.0.0",
+    "@vitest/ui": "^0.34.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.50.0",
+    "prettier": "^3.0.0",
+    "vitest": "^0.34.0"
   },
   "engines": {
     "node": ">=18.0.0"
